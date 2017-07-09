@@ -39,7 +39,7 @@ test:
 	GOPATH=${GOPATH} go test .
 
 get:
-	#GOPATH=${GOPATH} go get -pkgdir ${GOOSARCHPKG} -u
+	GOPATH=${GOPATH} go get -pkgdir ${GOOSARCHPKG} -u golang.org/x/image/font github.com/golang/freetype
 
 getlinux32:
 	GOOS=linux GOARCH=386 make get

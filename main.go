@@ -11,6 +11,10 @@ import (
 	"image/draw"
 	"math"
 	"strconv"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/inconsolata"
+	"sort"
+	"github.com/golang/freetype"
 )
 
 const (
@@ -177,12 +181,16 @@ func main() {
 	if err != nil {
 		log.Panicf("%v", err)
 	}
-	r := image.Rect(0,0,digitWidth * 4 + spacing * 3 + marginWidth * 2,digitHeight * 1 + marginHeight * 2)
+
+	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
+
+	digitBase := digitHeight*1 + marginHeight*2
+	r := image.Rect(0,0,digitWidth * 4 + spacing * 3 + marginWidth * 2, digitBase+ fontSize.Max.Y.Ceil())
 	p := color.Palette{
 		backgroundColour,
 		matchColour,
 		matchHeadColour,
-		//color.White,
+		color.White,
 	}
 	img := image.NewPaletted(r, p)
 	for i := 0; i < img.Bounds().Dy() * img.Bounds().Dx(); i++ {
@@ -196,7 +204,7 @@ func main() {
 	purmutations := free * notfree * (free - 1) * (notfree - 1)
 	log.Printf("Purmutations: %d", purmutations)
 
-	delay := 1
+	delay := 10
 
 	g := gif.GIF{
 		Delay: []int{delay},
@@ -205,11 +213,24 @@ func main() {
 
 	found := []int{}
 	foundat := []int{}
+	sortedList := []int{}
+	last := 0
+	top5 := ""
 
 	if n, ok := isANumber(initial); ok {
 		log.Printf("Got number %d (initial)", n)
 		found = append(found, n)
+		sortedList = append(sortedList, n)
 		foundat = append(foundat, -1)
+		last = n
+		top5 = fmt.Sprintf("%d", n)
+		d := &font.Drawer{
+			Face: inconsolata.Regular8x16,
+			Dot: freetype.Pt(0, digitBase),
+			Src: image.White,
+			Dst: img,
+		}
+		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
 	}
 
 
@@ -240,9 +261,19 @@ func main() {
 
 
 		if n, ok := isANumber(mutate); ok {
+			last = n
 			log.Printf("Got number %d at %d", n, i)
 			found = append(found, n)
 			foundat = append(foundat, i)
+
+			if a := sort.SearchInts(sortedList, n); len(sortedList) <= a || sortedList[a] != n {
+				sortedList = append(sortedList, n)
+				sort.Ints(sortedList)
+				top5 = ""
+				for ii := 0; ii < int(math.Min(float64(5), float64(len(sortedList)))); ii++ {
+					top5 = top5 + fmt.Sprintf("%d,", sortedList[len(sortedList)-1-ii])
+				}
+			}
 		}
 
 		img2 := image.NewPaletted(r, p)
@@ -250,6 +281,14 @@ func main() {
 		if err != nil {
 			log.Panicf("%v", err)
 		}
+		d := &font.Drawer{
+			Face: inconsolata.Regular8x16,
+			Dot: freetype.Pt(0, digitBase),
+			Src: image.White,
+			Dst: img2,
+		}
+		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
+
 
 		g.Image = append(g.Image, img2)
 		g.Delay = append(g.Delay, delay)
