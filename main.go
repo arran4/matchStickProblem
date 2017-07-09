@@ -87,6 +87,28 @@ func drawPic(input []bool, img draw.Image) error {
 	return nil
 }
 
+func countthem(a []bool) (t int, f int) {
+	for _, e := range a {
+		if e {
+			t++
+		} else {
+			f++
+		}
+	}
+	return
+}
+
+func findthem(a []bool) (t []int, f []int) {
+	for i, e := range a {
+		if e {
+			t = append(t, i)
+		} else {
+			f = append(f, i)
+		}
+	}
+	return
+}
+
 func main() {
 	initial := []bool {
 		false,
@@ -129,21 +151,63 @@ func main() {
 	for i := 0; i < img.Bounds().Dy() * img.Bounds().Dx(); i++ {
 		img.Set((i % img.Bounds().Dx()), (i / img.Bounds().Dx()), backgroundColour)
 	}
-
 	err = drawPic(initial, img)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
-	o := &gif.Options{
-		NumColors: len(p),
-		Drawer: draw.FloydSteinberg,
+	notfree, free := countthem(initial)
+	purmutations := free * notfree * (free - 1) * (notfree - 1)
+	log.Printf("Purmutations: %d", purmutations)
+
+	delay := 1
+
+	g := gif.GIF{
+		Delay: []int{delay},
+		Image:[]*image.Paletted{ img },
 	}
 
-	err = gif.Encode(outf, img, o)
+	nonfreePos, freePos := findthem(initial)
+
+	for i := 0; i < purmutations; i++ {
+		if (i % 100) == 0 {
+			log.Printf("%d", i)
+		}
+		mutate := make([]bool, len(initial))
+		copy(mutate, initial)
+
+		move1 := i % (free * notfree)
+		move1To := move1 % free
+		move1From := move1 / free
+		move2 := (i / (free * notfree)) % ((free-1) * (notfree-1))
+		move2To := move2 % (free-1)
+		move2From := move2 / (free-1)
+
+		if move2To >= move1To {
+			move2To += 1
+		}
+		if move2From >= move1From {
+			move2From += 1
+		}
+
+		mutate[nonfreePos[move1From]] = false
+		mutate[freePos[move1To]] = true
+		mutate[nonfreePos[move2From]] = false
+		mutate[freePos[move2To]] = true
+
+		img2 := image.NewPaletted(r, p)
+		err = drawPic(mutate, img2)
+		if err != nil {
+			log.Panicf("%v", err)
+		}
+
+		g.Image = append(g.Image, img2)
+		g.Delay = append(g.Delay, delay)
+	}
+
+	err = gif.EncodeAll(outf, &g)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
-
 
 	err = outf.Close()
 	if err != nil {
