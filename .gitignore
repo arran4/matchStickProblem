@@ -1,0 +1,7 @@
+*.iml
+*.exe
+/gopath
+/.idea
+/goosarchpkg
+/*.gif
+/matchProblem_*
