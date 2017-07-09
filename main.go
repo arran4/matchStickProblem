@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"strconv"
 )
 
 const (
@@ -107,6 +108,42 @@ func findthem(a []bool) (t []int, f []int) {
 		}
 	}
 	return
+}
+
+func isADigit(a []bool) ([]byte, bool) {
+	switch {
+	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]: return []byte("8"), true
+	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]: return []byte("6"), true
+	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]: return []byte("0"), true
+	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]: return []byte("9"), true
+	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]: return []byte("9"), true
+	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6] : return []byte("7"), true
+	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]: return []byte("5"), true
+	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]: return []byte("4"), true
+	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]: return []byte("3"), true
+	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]: return []byte("2"), true
+	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6] : return []byte("1"), true
+	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6] : return []byte("1"), true
+	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6] : return []byte("11"), true
+	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6] : return []byte(""), true
+	}
+	return []byte{}, false
+}
+
+func isANumber(a []bool) (int, bool) {
+	str := []byte{}
+	for i := 0; i < len(a) / 7; i++ {
+		if b, ok := isADigit(a[i:i+7]); !ok {
+			return 0, false
+		} else {
+			str = append(str, b...)
+		}
+	}
+	if i, err := strconv.ParseInt(string(str), 10, 64); err != nil {
+		return 0, false
+	} else {
+		return int(i), true
+	}
 }
 
 func main() {
