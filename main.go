@@ -132,7 +132,7 @@ func isADigit(a []bool) ([]byte, bool) {
 
 func isANumber(a []bool) (int, bool) {
 	str := []byte{}
-	for i := 0; i < len(a) / 7; i++ {
+	for i := 0; i < len(a); i+=7 {
 		if b, ok := isADigit(a[i:i+7]); !ok {
 			return 0, false
 		} else {
@@ -203,12 +203,19 @@ func main() {
 		Image:[]*image.Paletted{ img },
 	}
 
+	found := []int{}
+	foundat := []int{}
+
+	if n, ok := isANumber(initial); ok {
+		log.Printf("Got number %d (initial)", n)
+		found = append(found, n)
+		foundat = append(foundat, -1)
+	}
+
+
 	nonfreePos, freePos := findthem(initial)
 
 	for i := 0; i < purmutations; i++ {
-		if (i % 100) == 0 {
-			log.Printf("%d", i)
-		}
 		mutate := make([]bool, len(initial))
 		copy(mutate, initial)
 
@@ -230,6 +237,13 @@ func main() {
 		mutate[freePos[move1To]] = true
 		mutate[nonfreePos[move2From]] = false
 		mutate[freePos[move2To]] = true
+
+
+		if n, ok := isANumber(mutate); ok {
+			log.Printf("Got number %d at %d", n, i)
+			found = append(found, n)
+			foundat = append(foundat, i)
+		}
 
 		img2 := image.NewPaletted(r, p)
 		err = drawPic(mutate, img2)
