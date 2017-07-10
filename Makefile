@@ -20,7 +20,7 @@ get:
 	GOPATH=${GOPATH} go get golang.org/x/image/font github.com/golang/freetype github.com/goreleaser/goreleaser
 
 tag:
-	git tag -a ${TAG} -m "${TAG} release"
+	git tag -a ${TAG} 
 
 releaser:
 	./gopath/bin/goreleaser
