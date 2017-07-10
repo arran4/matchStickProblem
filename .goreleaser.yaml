@@ -1,0 +1,11 @@
+# .goreleaser.yml
+# Build customization
+builds:
+  - binary: matchProblem
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - i386

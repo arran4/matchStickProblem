@@ -176,6 +176,12 @@ func main() {
 		true, true,
 		true,
 
+		false,
+		false, false,
+		false,
+		false, false,
+		false,
+
 	}
 	outf, err := os.Create(fmt.Sprintf("out-%d.gif", time.Now().Unix()))
 	if err != nil {
@@ -185,7 +191,7 @@ func main() {
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
 
 	digitBase := digitHeight*1 + marginHeight*2
-	r := image.Rect(0,0,digitWidth * 4 + spacing * 3 + marginWidth * 2, digitBase+ fontSize.Max.Y.Ceil())
+	r := image.Rect(0,0,digitWidth * len(initial) / 7 + spacing * 3 + marginWidth * 2, digitBase+ fontSize.Max.Y.Ceil())
 	p := color.Palette{
 		backgroundColour,
 		matchColour,
