@@ -25,6 +25,9 @@ releasetag:
 releasepush:
 	./gopath/bin/goreleaser
 
+snapshotpush:
+	./gopath/bin/goreleaser --skip-validate --skip-publish
+
 release: releasetag releasepush
 
 install: get

@@ -5,6 +5,6 @@ install:
 script:
   - make test
 after_success:
-  - test -n "$TRAVIS_TAG" && make releasepush || go run main.go --skip-validate --skip-publish
+  - test -n "$TRAVIS_TAG" && make releasepush || make snapshotpush
 notifications:
   email: false
