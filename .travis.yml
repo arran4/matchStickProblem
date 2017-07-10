@@ -6,7 +6,7 @@ script:
   - make test
   #- make run
 after_success:
-  - test -n "$TRAVIS_TAG" && make tag releaser || make snapshotreleaser
+  - test -n "$TRAVIS_TAG" && make releaser || make snapshotreleaser
 notifications:
   email: false
 deploy:
