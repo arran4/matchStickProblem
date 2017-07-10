@@ -4,7 +4,7 @@ TAG=$(shell expr `git tag | wc -l ` + 1)
 all: build
 
 run:
-	GOPATH=${GOPATH} go run
+	GOPATH=${GOPATH} go run main.go
 
 package: build
 	rm -f ${OUTPUTNAME}.7z
@@ -19,16 +19,14 @@ test:
 get:
 	GOPATH=${GOPATH} go get golang.org/x/image/font github.com/golang/freetype github.com/goreleaser/goreleaser
 
-releasetag:
-	git tag -a ${TAG} -m "second release" && git push && git push origin --tags
+tag:
+	git tag -a ${TAG} -m "${TAG} release"
 
-releasepush:
+releaser:
 	./gopath/bin/goreleaser
 
-snapshotpush:
+snapshotreleaser:
 	./gopath/bin/goreleaser --skip-validate --skip-publish
-
-release: releasetag releasepush
 
 install: get
 	GOPATH=${GOPATH} go install github.com/goreleaser/goreleaser

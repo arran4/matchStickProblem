@@ -4,7 +4,15 @@ install:
   - make get
 script:
   - make test
+  - make run
 after_success:
-  - test -n "$TRAVIS_TAG" && make releasepush || make snapshotpush
+  - test -n "$TRAVIS_TAG" && make tag releaser || make snapshotreleaser
 notifications:
   email: false
+deploy:
+  provider: releases
+  api_key: "$GITHUB_TOKEN"
+  file: "*.gif"
+  skip_cleanup: true
+  on:
+    tags: true
