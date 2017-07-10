@@ -4,7 +4,7 @@ install:
   - make get
 script:
   - make test
-  - make run
+  #- make run
 after_success:
   - test -n "$TRAVIS_TAG" && make tag releaser || make snapshotreleaser
 notifications:
