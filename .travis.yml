@@ -5,9 +5,6 @@ install:
 script:
   - make test
 after_success:
-  - git config user.email "arran4+travis@gmail.com"
-  - git config user.name "Arran Ubels (Travis)"
-  - git config push.default matching
-  - make release
+  - test -n "$TRAVIS_TAG" && make releasepush
 notifications:
   email: false

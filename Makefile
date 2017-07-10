@@ -19,9 +19,13 @@ test:
 get:
 	GOPATH=${GOPATH} go get golang.org/x/image/font github.com/golang/freetype github.com/goreleaser/goreleaser
 
-release: install
+releasetag:
 	git tag -a ${TAG} -m "second release" && git push && git push origin --tags
+
+releasepush:
 	./gopath/bin/goreleaser
+
+release: releasetag releasepush
 
 install: get
 	GOPATH=${GOPATH} go install github.com/goreleaser/goreleaser
