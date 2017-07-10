@@ -7,6 +7,7 @@ script:
 after_success:
   - git config user.email "arran4+travis@gmail.com"
   - git config user.name "Arran Ubels (Travis)"
+  - git config push.default matching
   - make release
 notifications:
   email: false
