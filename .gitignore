@@ -4,4 +4,6 @@
 /.idea
 /goosarchpkg
 /*.gif
-/matchProblem_**.mp4
+/matchProblem_*
+/*.mp4
+/dist
