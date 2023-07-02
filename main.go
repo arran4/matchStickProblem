@@ -34,7 +34,7 @@ var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	outfn            = flag.String("out", "out-%d.gif", "output filename")
+	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now()), "output filename")
 )
 
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
