@@ -200,7 +200,7 @@ func main() {
 		false, false,
 		false,
 	}
-	outf, err := os.Create(fmt.Sprintf(*outfn, time.Now().Unix()))
+	outf, err := os.Create(*outfn)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
