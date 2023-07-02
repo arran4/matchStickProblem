@@ -1,20 +1,21 @@
 package main
 
 import (
-	"image"
-	"image/gif"
-	"os"
+	"flag"
 	"fmt"
-	"time"
-	"log"
-	"image/color"
-	"image/draw"
-	"math"
-	"strconv"
+	"github.com/golang/freetype"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/inconsolata"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/gif"
+	"log"
+	"math"
+	"os"
 	"sort"
-	"github.com/golang/freetype"
+	"strconv"
+	"time"
 )
 
 const (
@@ -22,8 +23,8 @@ const (
 	matchWidth      = 1 * multiplier
 	matchHeadLength = 1 * multiplier
 	matchLength     = 10 * multiplier
-	digitHeight     = matchWidth * 3 + matchLength * 2
-	digitWidth      = matchWidth * 2 + matchLength * 1
+	digitHeight     = matchWidth*3 + matchLength*2
+	digitWidth      = matchWidth*2 + matchLength*1
 	marginHeight    = matchWidth
 	marginWidth     = matchWidth
 	spacing         = matchWidth
@@ -31,16 +32,17 @@ const (
 
 var (
 	backgroundColour = color.Black
-	matchColour = color.RGBA{0xA5,0x2A,0x2A, math.MaxUint8,}
-	matchHeadColour = color.RGBA{255,0,0, math.MaxUint8,}
+	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
+	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
+	outfn            = flag.String("out", "out-%d.gif", "output filename")
 )
 
-func drawMatch(img draw.Image, x,y int, leftRight bool) error {
+func drawMatch(img draw.Image, x, y int, leftRight bool) error {
 	xlim := matchWidth
 	for i := 0; i < (matchWidth * matchHeadLength); i++ {
-		img.Set(x + (i % xlim), y + (i / xlim), matchHeadColour)
+		img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
 	}
-	mlim := (matchLength - matchHeadLength)
+	mlim := matchLength - matchHeadLength
 	xOff := matchHeadLength
 	yOff := 0
 	if !leftRight {
@@ -48,7 +50,7 @@ func drawMatch(img draw.Image, x,y int, leftRight bool) error {
 		xOff, yOff = yOff, xOff
 	}
 	for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
-		img.Set(x + (i % mlim) + xOff, y + (i / mlim) + yOff, matchColour)
+		img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
 	}
 	return nil
 }
@@ -81,10 +83,10 @@ func drawPic(input []bool, img draw.Image) error {
 		case 3:
 			y += matchLength
 			fallthrough
-		case 1,2:
+		case 1, 2:
 			y += matchWidth
 		}
-		err := drawMatch(img, x,y, left)
+		err := drawMatch(img, x, y, left)
 		if err != nil {
 			return err
 		}
@@ -116,28 +118,42 @@ func findthem(a []bool) (t []int, f []int) {
 
 func isADigit(a []bool) ([]byte, bool) {
 	switch {
-	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]: return []byte("8"), true
-	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]: return []byte("6"), true
-	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]: return []byte("0"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]: return []byte("9"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]: return []byte("9"), true
-	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6] : return []byte("7"), true
-	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]: return []byte("5"), true
-	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]: return []byte("4"), true
-	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]: return []byte("3"), true
-	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]: return []byte("2"), true
-	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6] : return []byte("1"), true
-	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6] : return []byte("1"), true
-	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6] : return []byte("11"), true
-	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6] : return []byte(""), true
+	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
+		return []byte("8"), true
+	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]:
+		return []byte("6"), true
+	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]:
+		return []byte("0"), true
+	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
+		return []byte("9"), true
+	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
+		return []byte("9"), true
+	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
+		return []byte("7"), true
+	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]:
+		return []byte("5"), true
+	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
+		return []byte("4"), true
+	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
+		return []byte("3"), true
+	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]:
+		return []byte("2"), true
+	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6]:
+		return []byte("1"), true
+	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
+		return []byte("1"), true
+	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6]:
+		return []byte("11"), true
+	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6]:
+		return []byte(""), true
 	}
 	return []byte{}, false
 }
 
 func isANumber(a []bool) (int, bool) {
 	str := []byte{}
-	for i := 0; i < len(a); i+=7 {
-		if b, ok := isADigit(a[i:i+7]); !ok {
+	for i := 0; i < len(a); i += 7 {
+		if b, ok := isADigit(a[i : i+7]); !ok {
 			return 0, false
 		} else {
 			str = append(str, b...)
@@ -151,7 +167,9 @@ func isANumber(a []bool) (int, bool) {
 }
 
 func main() {
-	initial := []bool {
+	start := time.Now()
+	flag.Parse()
+	initial := []bool{
 		false,
 		false, false,
 		false,
@@ -181,9 +199,8 @@ func main() {
 		false,
 		false, false,
 		false,
-
 	}
-	outf, err := os.Create(fmt.Sprintf("out-%d.gif", time.Now().Unix()))
+	outf, err := os.Create(fmt.Sprintf(*outfn, time.Now().Unix()))
 	if err != nil {
 		log.Panicf("%v", err)
 	}
@@ -191,7 +208,7 @@ func main() {
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
 
 	digitBase := digitHeight*1 + marginHeight*2
-	r := image.Rect(0,0,digitWidth * len(initial) / 7 + spacing * 3 + marginWidth * 2, digitBase+ fontSize.Max.Y.Ceil())
+	r := image.Rect(0, 0, digitWidth*len(initial)/7+spacing*3+marginWidth*2, digitBase+fontSize.Max.Y.Ceil())
 	p := color.Palette{
 		backgroundColour,
 		matchColour,
@@ -199,22 +216,22 @@ func main() {
 		color.White,
 	}
 	img := image.NewPaletted(r, p)
-	for i := 0; i < img.Bounds().Dy() * img.Bounds().Dx(); i++ {
-		img.Set((i % img.Bounds().Dx()), (i / img.Bounds().Dx()), backgroundColour)
+	for i := 0; i < img.Bounds().Dy()*img.Bounds().Dx(); i++ {
+		img.Set(i%img.Bounds().Dx(), i/img.Bounds().Dx(), backgroundColour)
 	}
 	err = drawPic(initial, img)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
 	notfree, free := countthem(initial)
-	purmutations := free * notfree * (free - 1) * (notfree - 1)
-	log.Printf("Purmutations: %d", purmutations)
+	permutations := free * notfree * (free - 1) * (notfree - 1)
+	log.Printf("Purmutations: %d", permutations)
 
 	delay := 10
 
 	g := gif.GIF{
 		Delay: []int{delay},
-		Image:[]*image.Paletted{ img },
+		Image: []*image.Paletted{img},
 	}
 
 	found := []int{}
@@ -224,7 +241,7 @@ func main() {
 	top5 := ""
 
 	if n, ok := isANumber(initial); ok {
-		log.Printf("Got number %d (initial)", n)
+		log.Printf("Got number %d (initial) ", n)
 		found = append(found, n)
 		sortedList = append(sortedList, n)
 		foundat = append(foundat, -1)
@@ -232,26 +249,25 @@ func main() {
 		top5 = fmt.Sprintf("%d", n)
 		d := &font.Drawer{
 			Face: inconsolata.Regular8x16,
-			Dot: freetype.Pt(0, digitBase),
-			Src: image.White,
-			Dst: img,
+			Dot:  freetype.Pt(0, digitBase),
+			Src:  image.White,
+			Dst:  img,
 		}
 		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
 	}
 
-
 	nonfreePos, freePos := findthem(initial)
 
-	for i := 0; i < purmutations; i++ {
+	for i := 0; i < permutations; i++ {
 		mutate := make([]bool, len(initial))
 		copy(mutate, initial)
 
 		move1 := i % (free * notfree)
 		move1To := move1 % free
 		move1From := move1 / free
-		move2 := (i / (free * notfree)) % ((free-1) * (notfree-1))
-		move2To := move2 % (free-1)
-		move2From := move2 / (free-1)
+		move2 := (i / (free * notfree)) % ((free - 1) * (notfree - 1))
+		move2To := move2 % (free - 1)
+		move2From := move2 / (free - 1)
 
 		if move2To >= move1To {
 			move2To += 1
@@ -265,10 +281,9 @@ func main() {
 		mutate[nonfreePos[move2From]] = false
 		mutate[freePos[move2To]] = true
 
-
 		if n, ok := isANumber(mutate); ok {
 			last = n
-			log.Printf("Got number %d at %d", n, i)
+			log.Printf("Got number %d at: %.0f%% %d/%d", n, float64(i)/float64(permutations)*100, i, permutations)
 			found = append(found, n)
 			foundat = append(foundat, i)
 
@@ -289,24 +304,29 @@ func main() {
 		}
 		d := &font.Drawer{
 			Face: inconsolata.Regular8x16,
-			Dot: freetype.Pt(0, digitBase),
-			Src: image.White,
-			Dst: img2,
+			Dot:  freetype.Pt(0, digitBase),
+			Src:  image.White,
+			Dst:  img2,
 		}
 		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
-
 
 		g.Image = append(g.Image, img2)
 		g.Delay = append(g.Delay, delay)
 	}
+
+	log.Printf("Permutations done, generating gif")
 
 	err = gif.EncodeAll(outf, &g)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
 
+	log.Printf("Gif generated saving: %s", *outfn)
+
 	err = outf.Close()
 	if err != nil {
 		log.Panicf("%v", err)
 	}
+
+	log.Printf("Done in %s", time.Now().Sub(start))
 }
