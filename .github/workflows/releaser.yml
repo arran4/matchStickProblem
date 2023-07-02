@@ -33,7 +33,7 @@ jobs:
       - name: Test
         run: go test ./...
       - name: Generate gif
-        run: go run .
+        run: go run . -out out.gif
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
