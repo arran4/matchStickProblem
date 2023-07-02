@@ -46,7 +46,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: out.gif
+          file_glob: true
+          file: "*.gif"
           tag: ${{ github.ref }}
           overwrite: true
           body: "Generated file"
