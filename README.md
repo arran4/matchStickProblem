@@ -4,7 +4,9 @@ This is a "simple" solver for the "Match Stick" problem meme that was going arou
 
 I probably would have bothered doing so, if the inbuilt go `image/gif` library was better at handling large files, or there was some sort of webm or apng library I could use. -- Without having to link ffmpeg in directly as that's cgo.
 
-![250mb gif (probably still loading)](https://github.com/arran4/matchStickProblem/releases/download/v0.3.4/out.gif)
+Example (will take it's time to load please wait.)
+
+![280mb ish gif (probably still loading)](https://github.com/arran4/matchStickProblem/releases/download/v0.3.4/out.gif)
 
 See releases for downloads:
 * https://github.com/arran4/matchStickProblem/releases
