@@ -1,11 +1,26 @@
-# .goreleaser.yml
-# Build customization
 builds:
   - binary: matchProblem
-    goos:
-      - windows
-      - darwin
-      - linux
-    goarch:
-      - amd64
-      - i386
+checksum:
+  name_template: 'checksums-linux.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+nfpms:
+  -
+    vendor: Ubels Software Development
+    homepage: https://github.com/arran4/
+    maintainer: Arran Ubels <arran@ubels.com.au>
+    description: NA
+    license: Private
+    formats:
+      - apk
+      - deb
+      - rpm
+    release: 1
+    section: default
+    priority: extra
