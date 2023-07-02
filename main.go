@@ -225,7 +225,7 @@ func main() {
 	}
 	notfree, free := countthem(initial)
 	permutations := free * notfree * (free - 1) * (notfree - 1)
-	log.Printf("Purmutations: %d", permutations)
+	log.Printf("Permutations: %d", permutations)
 
 	delay := 10
 
