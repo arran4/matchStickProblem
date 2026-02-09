@@ -34,7 +34,6 @@ var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	outfn            = flag.String("out", "", "output filename")
 )
 
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
@@ -168,6 +167,7 @@ func isANumber(a []bool) (int, bool) {
 
 func main() {
 	start := time.Now()
+	outfn := flag.String("out", "", "output filename")
 	flag.Parse()
 	initial := []bool{
 		false,
