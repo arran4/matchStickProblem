@@ -151,6 +151,9 @@ func isADigit(a []bool) ([]byte, bool) {
 }
 
 func isANumber(a []bool) (int, bool) {
+	if len(a)%7 != 0 {
+		return 0, false
+	}
 	str := []byte{}
 	for i := 0; i < len(a); i += 7 {
 		if b, ok := isADigit(a[i : i+7]); !ok {

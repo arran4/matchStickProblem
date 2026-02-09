@@ -128,6 +128,14 @@ func TestIsANumber(t *testing.T) {
 			true, true,
 			false,
 		}},
+		{0, false, []bool{
+			false,
+			false, false,
+			false,
+			false, false,
+			false,
+			false,
+		}},
 	}
 	for i, each := range expected {
 		if b, ok := isANumber(each.input); b != each.b || ok != each.ok {
