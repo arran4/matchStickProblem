@@ -248,6 +248,10 @@ func TestIsADigit(t *testing.T) {
 			true, true,
 			false,
 		}},
+		{"", false, []bool{
+			true,
+			true, true,
+		}},
 	}
 	for i, each := range expected {
 		if b, ok := isADigit(each.input); string(b) != each.b || ok != each.ok {

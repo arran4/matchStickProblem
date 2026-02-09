@@ -117,6 +117,9 @@ func findthem(a []bool) (t []int, f []int) {
 }
 
 func isADigit(a []bool) ([]byte, bool) {
+	if len(a) < 7 {
+		return []byte{}, false
+	}
 	switch {
 	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
 		return []byte("8"), true
