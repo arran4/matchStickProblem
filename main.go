@@ -38,20 +38,19 @@ var (
 )
 
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
-	xlim := matchWidth
-	for i := 0; i < (matchWidth * matchHeadLength); i++ {
-		img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
+	// Draw match head
+	headRect := image.Rect(x, y, x+matchWidth, y+matchHeadLength)
+	draw.Draw(img, headRect, &image.Uniform{matchHeadColour}, image.Point{}, draw.Src)
+
+	// Draw match body
+	var bodyRect image.Rectangle
+	if leftRight {
+		bodyRect = image.Rect(x+matchHeadLength, y, x+matchLength, y+matchWidth)
+	} else {
+		bodyRect = image.Rect(x, y+matchHeadLength, x+matchWidth, y+matchLength)
 	}
-	mlim := matchLength - matchHeadLength
-	xOff := matchHeadLength
-	yOff := 0
-	if !leftRight {
-		mlim = matchWidth
-		xOff, yOff = yOff, xOff
-	}
-	for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
-		img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
-	}
+	draw.Draw(img, bodyRect, &image.Uniform{matchColour}, image.Point{}, draw.Src)
+
 	return nil
 }
 
