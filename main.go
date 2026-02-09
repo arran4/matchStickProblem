@@ -36,6 +36,8 @@ var (
 	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
 )
 
+// drawMatch draws a matchstick on the given image at coordinates (x, y).
+// leftRight determines the orientation: true for horizontal, false for vertical.
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
 	xlim := matchWidth
 	for i := 0; i < (matchWidth * matchHeadLength); i++ {
@@ -54,6 +56,8 @@ func drawMatch(img draw.Image, x, y int, leftRight bool) error {
 	return nil
 }
 
+// drawPic draws the representation of the boolean slice as matchsticks on the image.
+// It assumes the slice represents a sequence of 7-segment displays.
 func drawPic(input []bool, img draw.Image) error {
 	for i, each := range input {
 		if !each {
@@ -93,6 +97,7 @@ func drawPic(input []bool, img draw.Image) error {
 	return nil
 }
 
+// countthem returns the count of true and false values in the input slice.
 func countthem(a []bool) (t int, f int) {
 	for _, e := range a {
 		if e {
@@ -104,7 +109,11 @@ func countthem(a []bool) (t int, f int) {
 	return
 }
 
-func findthem(a []bool) (t []int, f []int) {
+// findthem returns two slices of integers:
+// the first slice contains the indices where the input slice has true values,
+// the second slice contains the indices where the input slice has false values.
+func findthem(a []bool) ([]int, []int) {
+	var t, f []int
 	for i, e := range a {
 		if e {
 			t = append(t, i)
@@ -112,9 +121,12 @@ func findthem(a []bool) (t []int, f []int) {
 			f = append(f, i)
 		}
 	}
-	return
+	return t, f
 }
 
+// isADigit checks if a slice of 7 booleans represents a valid digit
+// on a 7-segment display. It returns the digit as a byte slice and a boolean indicating validity.
+// It also handles some special cases like "1" being represented on the left or right, or "11".
 func isADigit(a []bool) (int, int, bool) {
 	switch {
 	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
@@ -149,6 +161,8 @@ func isADigit(a []bool) (int, int, bool) {
 	return 0, 0, false
 }
 
+// isANumber checks if the input boolean slice represents a valid sequence of digits.
+// It returns the parsed integer and a boolean indicating validity.
 func isANumber(a []bool) (int, bool) {
 	n := 0
 	hasDigits := false
