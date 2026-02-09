@@ -138,6 +138,29 @@ func TestIsANumber(t *testing.T) {
 	}
 }
 
+func TestCountthem(t *testing.T) {
+	tests := []struct {
+		input []bool
+		wantT int
+		wantF int
+	}{
+		{[]bool{}, 0, 0},
+		{[]bool{true}, 1, 0},
+		{[]bool{false}, 0, 1},
+		{[]bool{true, false}, 1, 1},
+		{[]bool{true, true, true}, 3, 0},
+		{[]bool{false, false}, 0, 2},
+		{[]bool{true, false, true, false, true}, 3, 2},
+	}
+
+	for i, tc := range tests {
+		gotT, gotF := countthem(tc.input)
+		if gotT != tc.wantT || gotF != tc.wantF {
+			t.Errorf("Test #%d: countthem(%v) = (%d, %d); want (%d, %d)", i, tc.input, gotT, gotF, tc.wantT, tc.wantF)
+		}
+	}
+}
+
 func TestIsADigit(t *testing.T) {
 	expected := []struct {
 		val    int
