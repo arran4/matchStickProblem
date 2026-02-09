@@ -275,6 +275,8 @@ func main() {
 		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
 	}
 
+	cachedStatus := fmt.Sprintf("Last: %d   Best 5: %s", last, top5)
+
 	nonfreePos, freePos := findthem(initial)
 
 	for i := 0; i < permutations; i++ {
@@ -314,6 +316,7 @@ func main() {
 					top5 = top5 + fmt.Sprintf("%d,", sortedList[len(sortedList)-1-ii])
 				}
 			}
+			cachedStatus = fmt.Sprintf("Last: %d   Best 5: %s", last, top5)
 		}
 
 		img2 := image.NewPaletted(r, p)
@@ -327,7 +330,7 @@ func main() {
 			Src:  image.White,
 			Dst:  img2,
 		}
-		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
+		d.DrawString(cachedStatus)
 
 		g.Image = append(g.Image, img2)
 		g.Delay = append(g.Delay, delay)
