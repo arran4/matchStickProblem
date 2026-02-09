@@ -35,6 +35,22 @@ var (
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
 	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
+	digitMap         = map[int]string{
+		127: "8",
+		123: "6",
+		119: "0",
+		111: "9",
+		47:  "9",
+		37:  "7",
+		107: "5",
+		46:  "4",
+		109: "3",
+		93:  "2",
+		18:  "1",
+		36:  "1",
+		54:  "11",
+		0:   "",
+	}
 )
 
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
@@ -117,35 +133,14 @@ func findthem(a []bool) (t []int, f []int) {
 }
 
 func isADigit(a []bool) ([]byte, bool) {
-	switch {
-	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("8"), true
-	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("6"), true
-	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]:
-		return []byte("0"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("9"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("9"), true
-	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("7"), true
-	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("5"), true
-	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("4"), true
-	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("3"), true
-	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]:
-		return []byte("2"), true
-	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6]:
-		return []byte("1"), true
-	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("1"), true
-	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6]:
-		return []byte("11"), true
-	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6]:
-		return []byte(""), true
+	mask := 0
+	for i, v := range a {
+		if v {
+			mask |= 1 << i
+		}
+	}
+	if val, ok := digitMap[mask]; ok {
+		return []byte(val), true
 	}
 	return []byte{}, false
 }
