@@ -127,7 +127,10 @@ func findthem(a []bool) ([]int, []int) {
 // isADigit checks if a slice of 7 booleans represents a valid digit
 // on a 7-segment display. It returns the digit as a byte slice and a boolean indicating validity.
 // It also handles some special cases like "1" being represented on the left or right, or "11".
-func isADigit(a []bool) (int, int, bool) {
+func isADigit(a []bool) ([]byte, bool) {
+	if len(a) < 7 {
+		return []byte{}, false
+	}
 	switch {
 	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
 		return 8, 1, true

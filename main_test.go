@@ -250,6 +250,10 @@ func TestIsADigit(t *testing.T) {
 			true, true,
 			false,
 		}},
+		{"", false, []bool{
+			true,
+			true, true,
+		}},
 	}
 	for i, each := range expected {
 		if val, digits, ok := isADigit(each.input); val != each.val || digits != each.digits || ok != each.ok {
