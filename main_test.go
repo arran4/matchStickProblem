@@ -256,3 +256,25 @@ func TestIsADigit(t *testing.T) {
 		}
 	}
 }
+
+func TestCountThem(t *testing.T) {
+	expected := []struct {
+		t     int
+		f     int
+		input []bool
+	}{
+		{0, 0, []bool{}},
+		{1, 0, []bool{true}},
+		{0, 1, []bool{false}},
+		{1, 1, []bool{true, false}},
+		{2, 1, []bool{true, false, true}},
+		{3, 0, []bool{true, true, true}},
+		{0, 3, []bool{false, false, false}},
+	}
+	for i, each := range expected {
+		if tr, fr := countthem(each.input); tr != each.t || fr != each.f {
+			log.Printf("Failed on #%d (expected %d, %d) got (%d, %d)", i, each.t, each.f, tr, fr)
+			t.Fail()
+		}
+	}
+}
