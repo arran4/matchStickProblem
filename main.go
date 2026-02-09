@@ -28,6 +28,15 @@ const (
 	marginHeight    = matchWidth
 	marginWidth     = matchWidth
 	spacing         = matchWidth
+
+	segTop         = 0
+	segTopLeft     = 1
+	segTopRight    = 2
+	segMiddle      = 3
+	segBottomLeft  = 4
+	segBottomRight = 5
+	segBottom      = 6
+	segCount       = 7
 )
 
 var (
@@ -60,30 +69,30 @@ func drawPic(input []bool, img draw.Image) error {
 		if !each {
 			continue
 		}
-		pos := i % 7
+		pos := i % segCount
 		x := marginWidth
-		x += (i / 7) * (digitWidth + spacing)
+		x += (i / segCount) * (digitWidth + spacing)
 		switch pos {
-		case 1, 4:
-		case 2, 5:
+		case segTopLeft, segBottomLeft:
+		case segTopRight, segBottomRight:
 			x += matchLength
 			fallthrough
-		case 0, 3, 6:
+		case segTop, segMiddle, segBottom:
 			x += matchWidth
 		}
 		y := marginHeight
-		left := pos == 0 || pos == 3 || pos == 6
+		left := pos == segTop || pos == segMiddle || pos == segBottom
 		switch pos {
-		case 6:
+		case segBottom:
 			y += matchLength
 			fallthrough
-		case 4, 5:
+		case segBottomLeft, segBottomRight:
 			y += matchWidth
 			fallthrough
-		case 3:
+		case segMiddle:
 			y += matchLength
 			fallthrough
-		case 1, 2:
+		case segTopLeft, segTopRight:
 			y += matchWidth
 		}
 		err := drawMatch(img, x, y, left)
@@ -118,33 +127,33 @@ func findthem(a []bool) (t []int, f []int) {
 
 func isADigit(a []bool) ([]byte, bool) {
 	switch {
-	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
+	case a[segTop] && a[segTopLeft] && a[segTopRight] && a[segMiddle] && a[segBottomLeft] && a[segBottomRight] && a[segBottom]:
 		return []byte("8"), true
-	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]:
+	case a[segTop] && a[segTopLeft] && !a[segTopRight] && a[segMiddle] && a[segBottomLeft] && a[segBottomRight] && a[segBottom]:
 		return []byte("6"), true
-	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]:
+	case a[segTop] && a[segTopLeft] && a[segTopRight] && !a[segMiddle] && a[segBottomLeft] && a[segBottomRight] && a[segBottom]:
 		return []byte("0"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
+	case a[segTop] && a[segTopLeft] && a[segTopRight] && a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && a[segBottom]:
 		return []byte("9"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
+	case a[segTop] && a[segTopLeft] && a[segTopRight] && a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && !a[segBottom]:
 		return []byte("9"), true
-	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
+	case a[segTop] && !a[segTopLeft] && a[segTopRight] && !a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && !a[segBottom]:
 		return []byte("7"), true
-	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]:
+	case a[segTop] && a[segTopLeft] && !a[segTopRight] && a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && a[segBottom]:
 		return []byte("5"), true
-	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
+	case !a[segTop] && a[segTopLeft] && a[segTopRight] && a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && !a[segBottom]:
 		return []byte("4"), true
-	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
+	case a[segTop] && !a[segTopLeft] && a[segTopRight] && a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && a[segBottom]:
 		return []byte("3"), true
-	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]:
+	case a[segTop] && !a[segTopLeft] && a[segTopRight] && a[segMiddle] && a[segBottomLeft] && !a[segBottomRight] && a[segBottom]:
 		return []byte("2"), true
-	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6]:
+	case !a[segTop] && a[segTopLeft] && !a[segTopRight] && !a[segMiddle] && a[segBottomLeft] && !a[segBottomRight] && !a[segBottom]:
 		return []byte("1"), true
-	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
+	case !a[segTop] && !a[segTopLeft] && a[segTopRight] && !a[segMiddle] && !a[segBottomLeft] && a[segBottomRight] && !a[segBottom]:
 		return []byte("1"), true
-	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6]:
+	case !a[segTop] && a[segTopLeft] && a[segTopRight] && !a[segMiddle] && a[segBottomLeft] && a[segBottomRight] && !a[segBottom]:
 		return []byte("11"), true
-	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6]:
+	case !a[segTop] && !a[segTopLeft] && !a[segTopRight] && !a[segMiddle] && !a[segBottomLeft] && !a[segBottomRight] && !a[segBottom]:
 		return []byte(""), true
 	}
 	return []byte{}, false
@@ -152,8 +161,8 @@ func isADigit(a []bool) ([]byte, bool) {
 
 func isANumber(a []bool) (int, bool) {
 	str := []byte{}
-	for i := 0; i < len(a); i += 7 {
-		if b, ok := isADigit(a[i : i+7]); !ok {
+	for i := 0; i < len(a); i += segCount {
+		if b, ok := isADigit(a[i : i+segCount]); !ok {
 			return 0, false
 		} else {
 			str = append(str, b...)
@@ -208,7 +217,7 @@ func main() {
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
 
 	digitBase := digitHeight*1 + marginHeight*2
-	r := image.Rect(0, 0, digitWidth*len(initial)/7+spacing*3+marginWidth*2, digitBase+fontSize.Max.Y.Ceil())
+	r := image.Rect(0, 0, digitWidth*len(initial)/segCount+spacing*3+marginWidth*2, digitBase+fontSize.Max.Y.Ceil())
 	p := color.Palette{
 		backgroundColour,
 		matchColour,
