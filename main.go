@@ -34,7 +34,7 @@ var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
+	outfn            = flag.String("out", "", "output filename")
 )
 
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
@@ -200,9 +200,20 @@ func main() {
 		false, false,
 		false,
 	}
-	outf, err := os.Create(*outfn)
-	if err != nil {
-		log.Panicf("%v", err)
+
+	var outf *os.File
+	var err error
+	if *outfn == "" {
+		outf, err = os.CreateTemp(".", "out-*.gif")
+		if err != nil {
+			log.Panicf("%v", err)
+		}
+		*outfn = outf.Name()
+	} else {
+		outf, err = os.Create(*outfn)
+		if err != nil {
+			log.Panicf("%v", err)
+		}
 	}
 
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
