@@ -250,9 +250,11 @@ func main() {
 	delay := 10
 
 	g := gif.GIF{
-		Delay: []int{delay},
-		Image: []*image.Paletted{img},
+		Delay: make([]int, 0, permutations+1),
+		Image: make([]*image.Paletted, 0, permutations+1),
 	}
+	g.Delay = append(g.Delay, delay)
+	g.Image = append(g.Image, img)
 
 	found := []int{}
 	foundat := []int{}
