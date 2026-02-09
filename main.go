@@ -34,6 +34,7 @@ var (
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
 	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
+	limit            = flag.Int("limit", -1, "limit the number of permutations/frames to generate (0 or less for no limit)")
 )
 
 // drawMatch draws a matchstick on the given image at coordinates (x, y).
@@ -280,6 +281,10 @@ func main() {
 	nonfreePos, freePos := findthem(initial)
 
 	for i := 0; i < permutations; i++ {
+		if *limit > 0 && i >= *limit {
+			log.Printf("Limit of %d permutations reached, stopping.", *limit)
+			break
+		}
 		mutate := make([]bool, len(initial))
 		copy(mutate, initial)
 
