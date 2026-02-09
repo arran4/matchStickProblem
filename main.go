@@ -105,7 +105,8 @@ func countthem(a []bool) (t int, f int) {
 	return
 }
 
-func findthem(a []bool) (t []int, f []int) {
+func findthem(a []bool) ([]int, []int) {
+	var t, f []int
 	for i, e := range a {
 		if e {
 			t = append(t, i)
@@ -113,7 +114,7 @@ func findthem(a []bool) (t []int, f []int) {
 			f = append(f, i)
 		}
 	}
-	return
+	return t, f
 }
 
 func isADigit(a []bool) ([]byte, bool) {

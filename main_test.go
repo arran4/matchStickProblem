@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"reflect"
 	"testing"
 )
 
@@ -254,5 +255,50 @@ func TestIsADigit(t *testing.T) {
 			log.Printf("Failed on #%d (expected %s) got (%s %v)", i, each.b, b, ok)
 			t.Fail()
 		}
+	}
+}
+
+func TestFindThem(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     []bool
+		wantTrue  []int
+		wantFalse []int
+	}{
+		{
+			name:      "mixed",
+			input:     []bool{true, false, true, false, true},
+			wantTrue:  []int{0, 2, 4},
+			wantFalse: []int{1, 3},
+		},
+		{
+			name:      "all true",
+			input:     []bool{true, true, true},
+			wantTrue:  []int{0, 1, 2},
+			wantFalse: nil,
+		},
+		{
+			name:      "all false",
+			input:     []bool{false, false},
+			wantTrue:  nil,
+			wantFalse: []int{0, 1},
+		},
+		{
+			name:      "empty",
+			input:     []bool{},
+			wantTrue:  nil,
+			wantFalse: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotTrue, gotFalse := findthem(tt.input)
+			if !reflect.DeepEqual(gotTrue, tt.wantTrue) {
+				t.Errorf("findthem() gotTrue = %v, want %v", gotTrue, tt.wantTrue)
+			}
+			if !reflect.DeepEqual(gotFalse, tt.wantFalse) {
+				t.Errorf("findthem() gotFalse = %v, want %v", gotFalse, tt.wantFalse)
+			}
+		})
 	}
 }
