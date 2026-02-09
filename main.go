@@ -222,7 +222,7 @@ func main() {
 	}
 	outf, err := os.Create(*outfn)
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
@@ -241,7 +241,7 @@ func main() {
 	}
 	err = drawPic(initial, img)
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 	notfree, free := countthem(initial)
 	permutations := free * notfree * (free - 1) * (notfree - 1)
@@ -327,7 +327,7 @@ func main() {
 		img2 := image.NewPaletted(r, p)
 		err = drawPic(mutate, img2)
 		if err != nil {
-			log.Panicf("%v", err)
+			log.Fatalf("%v", err)
 		}
 		d := &font.Drawer{
 			Face: inconsolata.Regular8x16,
@@ -345,14 +345,14 @@ func main() {
 
 	err = gif.EncodeAll(outf, &g)
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
 	log.Printf("Gif generated saving: %s", *outfn)
 
 	err = outf.Close()
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
 	log.Printf("Done in %s", time.Now().Sub(start))
