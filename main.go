@@ -14,7 +14,6 @@ import (
 	"math"
 	"os"
 	"sort"
-	"strconv"
 	"time"
 )
 
@@ -35,26 +34,30 @@ var (
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
 	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
+	limit            = flag.Int("limit", -1, "limit the number of permutations/frames to generate (0 or less for no limit)")
 )
 
+// drawMatch draws a matchstick on the given image at coordinates (x, y).
+// leftRight determines the orientation: true for horizontal, false for vertical.
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
-	xlim := matchWidth
-	for i := 0; i < (matchWidth * matchHeadLength); i++ {
-		img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
+	// Draw match head
+	headRect := image.Rect(x, y, x+matchWidth, y+matchHeadLength)
+	draw.Draw(img, headRect, &image.Uniform{matchHeadColour}, image.Point{}, draw.Src)
+
+	// Draw match body
+	var bodyRect image.Rectangle
+	if leftRight {
+		bodyRect = image.Rect(x+matchHeadLength, y, x+matchLength, y+matchWidth)
+	} else {
+		bodyRect = image.Rect(x, y+matchHeadLength, x+matchWidth, y+matchLength)
 	}
-	mlim := matchLength - matchHeadLength
-	xOff := matchHeadLength
-	yOff := 0
-	if !leftRight {
-		mlim = matchWidth
-		xOff, yOff = yOff, xOff
-	}
-	for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
-		img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
-	}
+	draw.Draw(img, bodyRect, &image.Uniform{matchColour}, image.Point{}, draw.Src)
+
 	return nil
 }
 
+// drawPic draws the representation of the boolean slice as matchsticks on the image.
+// It assumes the slice represents a sequence of 7-segment displays.
 func drawPic(input []bool, img draw.Image) error {
 	for i, each := range input {
 		if !each {
@@ -94,6 +97,7 @@ func drawPic(input []bool, img draw.Image) error {
 	return nil
 }
 
+// countthem returns the count of true and false values in the input slice.
 func countthem(a []bool) (t int, f int) {
 	for _, e := range a {
 		if e {
@@ -105,7 +109,11 @@ func countthem(a []bool) (t int, f int) {
 	return t, f
 }
 
-func findthem(a []bool) (t []int, f []int) {
+// findthem returns two slices of integers:
+// the first slice contains the indices where the input slice has true values,
+// the second slice contains the indices where the input slice has false values.
+func findthem(a []bool) ([]int, []int) {
+	var t, f []int
 	for i, e := range a {
 		if e {
 			t = append(t, i)
@@ -113,57 +121,72 @@ func findthem(a []bool) (t []int, f []int) {
 			f = append(f, i)
 		}
 	}
-	return
+	return t, f
 }
 
+// isADigit checks if a slice of 7 booleans represents a valid digit
+// on a 7-segment display. It returns the digit as a byte slice and a boolean indicating validity.
+// It also handles some special cases like "1" being represented on the left or right, or "11".
 func isADigit(a []bool) ([]byte, bool) {
+	if len(a) < 7 {
+		return []byte{}, false
+	}
 	switch {
 	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("8"), true
+		return 8, 1, true
 	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("6"), true
+		return 6, 1, true
 	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]:
-		return []byte("0"), true
+		return 0, 1, true
 	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("9"), true
+		return 9, 1, true
 	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("9"), true
+		return 9, 1, true
 	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("7"), true
+		return 7, 1, true
 	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("5"), true
+		return 5, 1, true
 	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("4"), true
+		return 4, 1, true
 	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("3"), true
+		return 3, 1, true
 	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]:
-		return []byte("2"), true
+		return 2, 1, true
 	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6]:
-		return []byte("1"), true
+		return 1, 1, true
 	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("1"), true
+		return 1, 1, true
 	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6]:
-		return []byte("11"), true
+		return 11, 2, true
 	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6]:
-		return []byte(""), true
+		return 0, 0, true
 	}
-	return []byte{}, false
+	return 0, 0, false
 }
 
+// isANumber checks if the input boolean slice represents a valid sequence of digits.
+// It returns the parsed integer and a boolean indicating validity.
 func isANumber(a []bool) (int, bool) {
-	str := []byte{}
+	n := 0
+	hasDigits := false
 	for i := 0; i < len(a); i += 7 {
-		if b, ok := isADigit(a[i : i+7]); !ok {
+		if val, digits, ok := isADigit(a[i : i+7]); !ok {
 			return 0, false
 		} else {
-			str = append(str, b...)
+			if digits > 0 {
+				hasDigits = true
+				if digits == 1 {
+					n = n*10 + val
+				} else {
+					n = n*100 + val
+				}
+			}
 		}
 	}
-	if i, err := strconv.ParseInt(string(str), 10, 64); err != nil {
+	if !hasDigits {
 		return 0, false
-	} else {
-		return int(i), true
 	}
+	return n, true
 }
 
 func main() {
@@ -202,7 +225,7 @@ func main() {
 	}
 	outf, err := os.Create(*outfn)
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
@@ -221,7 +244,7 @@ func main() {
 	}
 	err = drawPic(initial, img)
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 	notfree, free := countthem(initial)
 	permutations := free * notfree * (free - 1) * (notfree - 1)
@@ -230,9 +253,11 @@ func main() {
 	delay := 10
 
 	g := gif.GIF{
-		Delay: []int{delay},
-		Image: []*image.Paletted{img},
+		Delay: make([]int, 0, permutations+1),
+		Image: make([]*image.Paletted, 0, permutations+1),
 	}
+	g.Delay = append(g.Delay, delay)
+	g.Image = append(g.Image, img)
 
 	found := []int{}
 	foundat := []int{}
@@ -256,9 +281,15 @@ func main() {
 		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
 	}
 
+	cachedStatus := fmt.Sprintf("Last: %d   Best 5: %s", last, top5)
+
 	nonfreePos, freePos := findthem(initial)
 
 	for i := 0; i < permutations; i++ {
+		if *limit > 0 && i >= *limit {
+			log.Printf("Limit of %d permutations reached, stopping.", *limit)
+			break
+		}
 		mutate := make([]bool, len(initial))
 		copy(mutate, initial)
 
@@ -295,12 +326,13 @@ func main() {
 					top5 = top5 + fmt.Sprintf("%d,", sortedList[len(sortedList)-1-ii])
 				}
 			}
+			cachedStatus = fmt.Sprintf("Last: %d   Best 5: %s", last, top5)
 		}
 
 		img2 := image.NewPaletted(r, p)
 		err = drawPic(mutate, img2)
 		if err != nil {
-			log.Panicf("%v", err)
+			log.Fatalf("%v", err)
 		}
 		d := &font.Drawer{
 			Face: inconsolata.Regular8x16,
@@ -308,7 +340,7 @@ func main() {
 			Src:  image.White,
 			Dst:  img2,
 		}
-		d.DrawString(fmt.Sprintf("Last: %d   Best 5: %s", last, top5))
+		d.DrawString(cachedStatus)
 
 		g.Image = append(g.Image, img2)
 		g.Delay = append(g.Delay, delay)
@@ -318,14 +350,14 @@ func main() {
 
 	err = gif.EncodeAll(outf, &g)
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
 	log.Printf("Gif generated saving: %s", *outfn)
 
 	err = outf.Close()
 	if err != nil {
-		log.Panicf("%v", err)
+		log.Fatalf("%v", err)
 	}
 
 	log.Printf("Done in %s", time.Now().Sub(start))
