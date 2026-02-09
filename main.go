@@ -106,7 +106,7 @@ func countthem(a []bool) (t int, f int) {
 			f++
 		}
 	}
-	return
+	return t, f
 }
 
 // findthem returns two slices of integers:
