@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"testing"
 )
 
@@ -131,8 +130,7 @@ func TestIsANumber(t *testing.T) {
 	}
 	for i, each := range expected {
 		if b, ok := isANumber(each.input); b != each.b || ok != each.ok {
-			log.Printf("Failed on #%d (expected %d) got (%d %v)", i, each.b, b, ok)
-			t.Fail()
+			t.Errorf("Failed on #%d (expected %d) got (%d %v)", i, each.b, b, ok)
 		}
 	}
 }
@@ -251,8 +249,7 @@ func TestIsADigit(t *testing.T) {
 	}
 	for i, each := range expected {
 		if b, ok := isADigit(each.input); string(b) != each.b || ok != each.ok {
-			log.Printf("Failed on #%d (expected %s) got (%s %v)", i, each.b, b, ok)
-			t.Fail()
+			t.Errorf("Failed on #%d (expected %s) got (%s %v)", i, each.b, b, ok)
 		}
 	}
 }
