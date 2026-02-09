@@ -200,6 +200,9 @@ func main() {
 		false, false,
 		false,
 	}
+	if err := validatePath(*outfn); err != nil {
+		log.Panicf("Invalid output path: %v", err)
+	}
 	outf, err := os.Create(*outfn)
 	if err != nil {
 		log.Panicf("%v", err)
