@@ -113,7 +113,7 @@ func findthem(a []bool) (t []int, f []int) {
 			f = append(f, i)
 		}
 	}
-	return
+	return t, f
 }
 
 func isADigit(a []bool) ([]byte, bool) {
