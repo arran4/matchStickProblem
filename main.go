@@ -14,7 +14,6 @@ import (
 	"math"
 	"os"
 	"sort"
-	"strconv"
 	"time"
 )
 
@@ -116,54 +115,61 @@ func findthem(a []bool) (t []int, f []int) {
 	return
 }
 
-func isADigit(a []bool) ([]byte, bool) {
+func isADigit(a []bool) (int, int, bool) {
 	switch {
 	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("8"), true
+		return 8, 1, true
 	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("6"), true
+		return 6, 1, true
 	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]:
-		return []byte("0"), true
+		return 0, 1, true
 	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("9"), true
+		return 9, 1, true
 	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("9"), true
+		return 9, 1, true
 	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("7"), true
+		return 7, 1, true
 	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("5"), true
+		return 5, 1, true
 	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("4"), true
+		return 4, 1, true
 	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("3"), true
+		return 3, 1, true
 	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]:
-		return []byte("2"), true
+		return 2, 1, true
 	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6]:
-		return []byte("1"), true
+		return 1, 1, true
 	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("1"), true
+		return 1, 1, true
 	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6]:
-		return []byte("11"), true
+		return 11, 2, true
 	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6]:
-		return []byte(""), true
+		return 0, 0, true
 	}
-	return []byte{}, false
+	return 0, 0, false
 }
 
 func isANumber(a []bool) (int, bool) {
-	str := []byte{}
+	n := 0
+	hasDigits := false
 	for i := 0; i < len(a); i += 7 {
-		if b, ok := isADigit(a[i : i+7]); !ok {
+		if val, digits, ok := isADigit(a[i : i+7]); !ok {
 			return 0, false
 		} else {
-			str = append(str, b...)
+			if digits > 0 {
+				hasDigits = true
+				if digits == 1 {
+					n = n*10 + val
+				} else {
+					n = n*100 + val
+				}
+			}
 		}
 	}
-	if i, err := strconv.ParseInt(string(str), 10, 64); err != nil {
+	if !hasDigits {
 		return 0, false
-	} else {
-		return int(i), true
 	}
+	return n, true
 }
 
 func main() {

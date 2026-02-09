@@ -139,109 +139,110 @@ func TestIsANumber(t *testing.T) {
 
 func TestIsADigit(t *testing.T) {
 	expected := []struct {
-		b     string
-		ok    bool
-		input []bool
+		val    int
+		digits int
+		ok     bool
+		input  []bool
 	}{
-		{"", false, []bool{
+		{0, 0, false, []bool{
 			false,
 			false, false,
 			false,
 			false, false,
 			true,
 		}},
-		{"", true, []bool{
+		{0, 0, true, []bool{
 			false,
 			false, false,
 			false,
 			false, false,
 			false,
 		}},
-		{"1", true, []bool{
+		{1, 1, true, []bool{
 			false,
 			true, false,
 			false,
 			true, false,
 			false,
 		}},
-		{"1", true, []bool{
+		{1, 1, true, []bool{
 			false,
 			false, true,
 			false,
 			false, true,
 			false,
 		}},
-		{"2", true, []bool{
+		{2, 1, true, []bool{
 			true,
 			false, true,
 			true,
 			true, false,
 			true,
 		}},
-		{"3", true, []bool{
+		{3, 1, true, []bool{
 			true,
 			false, true,
 			true,
 			false, true,
 			true,
 		}},
-		{"4", true, []bool{
+		{4, 1, true, []bool{
 			false,
 			true, true,
 			true,
 			false, true,
 			false,
 		}},
-		{"5", true, []bool{
+		{5, 1, true, []bool{
 			true,
 			true, false,
 			true,
 			false, true,
 			true,
 		}},
-		{"6", true, []bool{
+		{6, 1, true, []bool{
 			true,
 			true, false,
 			true,
 			true, true,
 			true,
 		}},
-		{"7", true, []bool{
+		{7, 1, true, []bool{
 			true,
 			false, true,
 			false,
 			false, true,
 			false,
 		}},
-		{"8", true, []bool{
+		{8, 1, true, []bool{
 			true,
 			true, true,
 			true,
 			true, true,
 			true,
 		}},
-		{"9", true, []bool{
+		{9, 1, true, []bool{
 			true,
 			true, true,
 			true,
 			false, true,
 			true,
 		}},
-		{"9", true, []bool{
+		{9, 1, true, []bool{
 			true,
 			true, true,
 			true,
 			false, true,
 			false,
 		}},
-		{"0", true, []bool{
+		{0, 1, true, []bool{
 			true,
 			true, true,
 			false,
 			true, true,
 			true,
 		}},
-		{"11", true, []bool{
+		{11, 2, true, []bool{
 			false,
 			true, true,
 			false,
@@ -250,8 +251,8 @@ func TestIsADigit(t *testing.T) {
 		}},
 	}
 	for i, each := range expected {
-		if b, ok := isADigit(each.input); string(b) != each.b || ok != each.ok {
-			log.Printf("Failed on #%d (expected %s) got (%s %v)", i, each.b, b, ok)
+		if val, digits, ok := isADigit(each.input); val != each.val || digits != each.digits || ok != each.ok {
+			log.Printf("Failed on #%d (expected %d, %d) got (%d, %d %v)", i, each.val, each.digits, val, digits, ok)
 			t.Fail()
 		}
 	}
