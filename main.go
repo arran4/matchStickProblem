@@ -121,7 +121,7 @@ func countthem(a []bool) (t int, f int) {
 			f++
 		}
 	}
-	return
+	return t, f
 }
 
 func findthem(a []bool) (t []int, f []int) {
