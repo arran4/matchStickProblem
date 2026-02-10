@@ -34,6 +34,26 @@ var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
+	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
+	digitLookup      = [128]struct {
+		val string
+		ok  bool
+	}{
+		127: {"8", true},
+		123: {"6", true},
+		119: {"0", true},
+		111: {"9", true},
+		47:  {"9", true},
+		37:  {"7", true},
+		107: {"5", true},
+		46:  {"4", true},
+		109: {"3", true},
+		93:  {"2", true},
+		18:  {"1", true},
+		36:  {"1", true},
+		54:  {"11", true},
+		0:   {"", true},
+	}
 )
 
 func drawMatch(img draw.Image, x, y int, leftRight bool) error {
@@ -101,7 +121,7 @@ func countthem(a []bool) (t int, f int) {
 			f++
 		}
 	}
-	return
+	return t, f
 }
 
 func findthem(a []bool) (t []int, f []int) {
@@ -116,35 +136,16 @@ func findthem(a []bool) (t []int, f []int) {
 }
 
 func isADigit(a []bool) ([]byte, bool) {
-	switch {
-	case a[0] && a[1] && a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("8"), true
-	case a[0] && a[1] && !a[2] && a[3] && a[4] && a[5] && a[6]:
-		return []byte("6"), true
-	case a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && a[6]:
-		return []byte("0"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("9"), true
-	case a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("9"), true
-	case a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("7"), true
-	case a[0] && a[1] && !a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("5"), true
-	case !a[0] && a[1] && a[2] && a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("4"), true
-	case a[0] && !a[1] && a[2] && a[3] && !a[4] && a[5] && a[6]:
-		return []byte("3"), true
-	case a[0] && !a[1] && a[2] && a[3] && a[4] && !a[5] && a[6]:
-		return []byte("2"), true
-	case !a[0] && a[1] && !a[2] && !a[3] && a[4] && !a[5] && !a[6]:
-		return []byte("1"), true
-	case !a[0] && !a[1] && a[2] && !a[3] && !a[4] && a[5] && !a[6]:
-		return []byte("1"), true
-	case !a[0] && a[1] && a[2] && !a[3] && a[4] && a[5] && !a[6]:
-		return []byte("11"), true
-	case !a[0] && !a[1] && !a[2] && !a[3] && !a[4] && !a[5] && !a[6]:
-		return []byte(""), true
+	mask := 0
+	for i, v := range a {
+		if v {
+			mask |= 1 << i
+		}
+	}
+	if mask < len(digitLookup) {
+		if val := digitLookup[mask]; val.ok {
+			return []byte(val.val), true
+		}
 	}
 	return []byte{}, false
 }
