@@ -168,6 +168,7 @@ func isANumber(a []bool) (int, bool) {
 
 func main() {
 	start := time.Now()
+	outfn := flag.String("out", "", "output filename")
 	flag.Parse()
 	initial := []bool{
 		false,
@@ -200,9 +201,21 @@ func main() {
 		false, false,
 		false,
 	}
-	outf, err := os.Create(*outfn)
-	if err != nil {
-		log.Panicf("%v", err)
+
+	var outf *os.File
+	var err error
+	if *outfn == "" {
+		// Note: os.CreateTemp creates a persistent file that is not automatically deleted.
+		outf, err = os.CreateTemp(".", "out-*.gif")
+		if err != nil {
+			log.Panicf("%v", err)
+		}
+		*outfn = outf.Name()
+	} else {
+		outf, err = os.Create(*outfn)
+		if err != nil {
+			log.Panicf("%v", err)
+		}
 	}
 
 	fontSize, _ := font.BoundString(inconsolata.Regular8x16, "01234\n56789")
