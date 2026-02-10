@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"reflect"
 	"testing"
 )
 
@@ -163,124 +162,119 @@ func TestCountthem(t *testing.T) {
 
 func TestIsADigit(t *testing.T) {
 	expected := []struct {
-		val    int
-		digits int
-		ok     bool
-		input  []bool
+		b     string
+		ok    bool
+		input []bool
 	}{
-		{0, 0, false, []bool{
-			false,
-			false, false,
-			false,
-			false, false,
-			true,
-		}},
-		{0, 0, true, []bool{
-			false,
-			false, false,
-			false,
-			false, false,
-			false,
-		}},
-		{1, 1, true, []bool{
-			false,
-			true, false,
-			false,
-			true, false,
-			false,
-		}},
-		{1, 1, true, []bool{
-			false,
-			false, true,
-			false,
-			false, true,
-			false,
-		}},
-		{2, 1, true, []bool{
-			true,
-			false, true,
-			true,
-			true, false,
-			true,
-		}},
-		{3, 1, true, []bool{
-			true,
-			false, true,
-			true,
-			false, true,
-			true,
-		}},
-		{4, 1, true, []bool{
-			false,
-			true, true,
-			true,
-			false, true,
-			false,
-		}},
-		{5, 1, true, []bool{
-			true,
-			true, false,
-			true,
-			false, true,
-			true,
-		}},
-		{6, 1, true, []bool{
-			true,
-			true, false,
-			true,
-			true, true,
-			true,
-		}},
-		{7, 1, true, []bool{
-			true,
-			false, true,
-			false,
-			false, true,
-			false,
-		}},
-		{8, 1, true, []bool{
-			true,
-			true, true,
-			true,
-			true, true,
-			true,
-		}},
-		{9, 1, true, []bool{
-			true,
-			true, true,
-			true,
-			false, true,
-			true,
-		}},
-		{9, 1, true, []bool{
-			true,
-			true, true,
-			true,
-			false, true,
-			false,
-		}},
-		{0, 1, true, []bool{
-			true,
-			true, true,
-			false,
-			true, true,
-			true,
-		}},
-		{11, 2, true, []bool{
-			false,
-			true, true,
-			false,
-			true, true,
-			false,
-		}},
 		{"", false, []bool{
+			false,
+			false, false,
+			false,
+			false, false,
+			true,
+		}},
+		{"", true, []bool{
+			false,
+			false, false,
+			false,
+			false, false,
+			false,
+		}},
+		{"1", true, []bool{
+			false,
+			true, false,
+			false,
+			true, false,
+			false,
+		}},
+		{"1", true, []bool{
+			false,
+			false, true,
+			false,
+			false, true,
+			false,
+		}},
+		{"2", true, []bool{
+			true,
+			false, true,
+			true,
+			true, false,
+			true,
+		}},
+		{"3", true, []bool{
+			true,
+			false, true,
+			true,
+			false, true,
+			true,
+		}},
+		{"4", true, []bool{
+			false,
+			true, true,
+			true,
+			false, true,
+			false,
+		}},
+		{"5", true, []bool{
+			true,
+			true, false,
+			true,
+			false, true,
+			true,
+		}},
+		{"6", true, []bool{
+			true,
+			true, false,
 			true,
 			true, true,
+			true,
+		}},
+		{"7", true, []bool{
+			true,
+			false, true,
+			false,
+			false, true,
+			false,
+		}},
+		{"8", true, []bool{
+			true,
+			true, true,
+			true,
+			true, true,
+			true,
+		}},
+		{"9", true, []bool{
+			true,
+			true, true,
+			true,
+			false, true,
+			true,
+		}},
+		{"9", true, []bool{
+			true,
+			true, true,
+			true,
+			false, true,
+			false,
+		}},
+		{"0", true, []bool{
+			true,
+			true, true,
+			false,
+			true, true,
+			true,
+		}},
+		{"11", true, []bool{
+			false,
+			true, true,
+			false,
+			true, true,
+			false,
 		}},
 	}
 	for i, each := range expected {
-		if val, digits, ok := isADigit(each.input); val != each.val || digits != each.digits || ok != each.ok {
-			log.Printf("Failed on #%d (expected %d, %d) got (%d, %d %v)", i, each.val, each.digits, val, digits, ok)
+		if b, ok := isADigit(each.input); string(b) != each.b || ok != each.ok {
+			log.Printf("Failed on #%d (expected %s) got (%s %v)", i, each.b, b, ok)
 			t.Fail()
 		}
 	}
