@@ -204,6 +204,7 @@ func main() {
 	var outf *os.File
 	var err error
 	if *outfn == "" {
+		// Note: os.CreateTemp creates a persistent file that is not automatically deleted.
 		outf, err = os.CreateTemp(".", "out-*.gif")
 		if err != nil {
 			log.Panicf("%v", err)
