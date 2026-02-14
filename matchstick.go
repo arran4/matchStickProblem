@@ -1,7 +1,6 @@
-package main
+package matchStickProblem
 
 import (
-	"flag"
 	"fmt"
 	"github.com/golang/freetype"
 	"golang.org/x/image/font"
@@ -43,7 +42,6 @@ var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	outfn            = flag.String("out", fmt.Sprintf("out-%d.gif", time.Now().Unix()), "output filename")
 	digitLookup      = [128]struct {
 		val string
 		ok  bool
@@ -175,10 +173,14 @@ func isANumber(a []bool) (int, bool) {
 	}
 }
 
-func main() {
+// Run is a subcommand `matchStickProblem run`
+//
+// Flags:
+// 	outfn: --out -out (default: "") output filename
+//
+func Run(outfn string) {
 	start := time.Now()
-	outfn := flag.String("out", "", "output filename")
-	flag.Parse()
+
 	initial := []bool{
 		false,
 		false, false,
@@ -213,15 +215,15 @@ func main() {
 
 	var outf *os.File
 	var err error
-	if *outfn == "" {
+	if outfn == "" {
 		// Note: os.CreateTemp creates a persistent file that is not automatically deleted.
 		outf, err = os.CreateTemp(".", "out-*.gif")
 		if err != nil {
 			log.Panicf("%v", err)
 		}
-		*outfn = outf.Name()
+		outfn = outf.Name()
 	} else {
-		outf, err = os.Create(*outfn)
+		outf, err = os.Create(outfn)
 		if err != nil {
 			log.Panicf("%v", err)
 		}
@@ -343,7 +345,7 @@ func main() {
 		log.Panicf("%v", err)
 	}
 
-	log.Printf("Gif generated saving: %s", *outfn)
+	log.Printf("Gif generated saving: %s", outfn)
 
 	err = outf.Close()
 	if err != nil {
