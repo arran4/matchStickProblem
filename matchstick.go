@@ -17,6 +17,15 @@ import (
 	"time"
 )
 
+type Orientation int
+
+const (
+	Horizontal Orientation = iota
+	Vertical
+	DiagonalForward
+	DiagonalBackward
+)
+
 const (
 	multiplier      = 10
 	matchWidth      = 1 * multiplier
@@ -63,20 +72,46 @@ var (
 	}
 )
 
-func drawMatch(img draw.Image, x, y int, leftRight bool) error {
-	xlim := matchWidth
-	for i := 0; i < (matchWidth * matchHeadLength); i++ {
-		img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
+func drawMatch(img draw.Image, x, y int, o Orientation) error {
+	if o == Horizontal || o == Vertical {
+		leftRight := o == Horizontal
+		xlim := matchWidth
+		for i := 0; i < (matchWidth * matchHeadLength); i++ {
+			img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
+		}
+		mlim := matchLength - matchHeadLength
+		xOff := matchHeadLength
+		yOff := 0
+		if !leftRight {
+			mlim = matchWidth
+			xOff, yOff = yOff, xOff
+		}
+		for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
+			img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
+		}
+		return nil
 	}
-	mlim := matchLength - matchHeadLength
-	xOff := matchHeadLength
-	yOff := 0
-	if !leftRight {
-		mlim = matchWidth
-		xOff, yOff = yOff, xOff
-	}
-	for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
-		img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
+
+	for i := 0; i < matchLength; i++ {
+		for j := 0; j < matchWidth; j++ {
+			c := matchColour
+			if i < matchHeadLength {
+				c = matchHeadColour
+			}
+			px, py := 0, 0
+			if o == DiagonalForward {
+				// \ direction
+				px = x + i + j
+				py = y + i + (matchWidth - j)
+			} else if o == DiagonalBackward {
+				// / direction
+				px = x + i + j
+				py = y - i + (matchWidth - j)
+			}
+			img.Set(px, py, c)
+			// fill holes
+			img.Set(px+1, py, c)
+		}
 	}
 	return nil
 }
@@ -112,7 +147,15 @@ func drawPic(input []bool, img draw.Image) error {
 		case segTopLeft, segTopRight:
 			y += matchWidth
 		}
-		err := drawMatch(img, x, y, left)
+
+		var o Orientation
+		if left {
+			o = Horizontal
+		} else {
+			o = Vertical
+		}
+
+		err := drawMatch(img, x, y, o)
 		if err != nil {
 			return err
 		}
