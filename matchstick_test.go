@@ -6,133 +6,59 @@ import (
 	"testing"
 )
 
+func makeDigit(on ...int) []bool {
+	arr := make([]bool, 16)
+	for _, i := range on {
+		arr[i] = true
+	}
+	return arr
+}
+
+func concat(slices ...[]bool) []bool {
+	var res []bool
+	for _, s := range slices {
+		res = append(res, s...)
+	}
+	return res
+}
+
 func TestIsANumber(t *testing.T) {
+	d0 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7)
+	d1 := makeDigit(2, 3)
+	d2 := makeDigit(0, 1, 2, 8, 9, 6, 4, 5)
+	d3 := makeDigit(0, 1, 2, 8, 9, 3, 4, 5)
+	d4 := makeDigit(7, 8, 9, 2, 3)
+	d5 := makeDigit(0, 1, 7, 8, 9, 3, 4, 5)
+	d6 := makeDigit(0, 1, 7, 6, 4, 5, 3, 8, 9)
+	d7 := makeDigit(0, 1, 2, 3)
+	d8 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+	d9 := makeDigit(0, 1, 2, 3, 4, 5, 7, 8, 9)
+	empty := makeDigit()
+	invalid := makeDigit(15) // K is not used alone in any standard digit here
+
 	expected := []struct {
 		b     int
 		ok    bool
 		input []bool
 	}{
-		{0, false, []bool{
-			false,
-			false, false,
-			false,
-			false, false,
-			true,
-		}},
-		{0, false, []bool{
-			false,
-			false, false,
-			false,
-			false, false,
-			false,
-		}},
-		{1, true, []bool{
-			false,
-			true, false,
-			false,
-			true, false,
-			false,
-		}},
-		{1, true, []bool{
-			false,
-			false, true,
-			false,
-			false, true,
-			false,
-		}},
-		{2, true, []bool{
-			true,
-			false, true,
-			true,
-			true, false,
-			true,
-		}},
-		{3, true, []bool{
-			true,
-			false, true,
-			true,
-			false, true,
-			true,
-		}},
-		{4, true, []bool{
-			false,
-			true, true,
-			true,
-			false, true,
-			false,
-		}},
-		{5, true, []bool{
-			true,
-			true, false,
-			true,
-			false, true,
-			true,
-		}},
-		{6, true, []bool{
-			true,
-			true, false,
-			true,
-			true, true,
-			true,
-		}},
-		{7, true, []bool{
-			true,
-			false, true,
-			false,
-			false, true,
-			false,
-		}},
-		{8, true, []bool{
-			true,
-			true, true,
-			true,
-			true, true,
-			true,
-		}},
-		{9, true, []bool{
-			true,
-			true, true,
-			true,
-			false, true,
-			true,
-		}},
-		{9, true, []bool{
-			true,
-			true, true,
-			true,
-			false, true,
-			false,
-		}},
-		{0, true, []bool{
-			true,
-			true, true,
-			false,
-			true, true,
-			true,
-		}},
-		{11, true, []bool{
-			false,
-			true, true,
-			false,
-			true, true,
-			false,
-		}},
-		{1111, true, []bool{
-			false,
-			true, true,
-			false,
-			true, true,
-			false,
-			false,
-			true, true,
-			false,
-			true, true,
-			false,
-		}},
+		{0, false, invalid},
+		{0, false, empty},
+		{1, true, d1},
+		{2, true, d2},
+		{3, true, d3},
+		{4, true, d4},
+		{5, true, d5},
+		{6, true, d6},
+		{7, true, d7},
+		{8, true, d8},
+		{9, true, d9},
+		{0, true, d0},
+		{11, true, concat(d1, d1)},
+		{1111, true, concat(d1, d1, d1, d1)},
 	}
 	for i, each := range expected {
 		if b, ok := isANumber(each.input); b != each.b || ok != each.ok {
-			log.Printf("Failed on #%d (expected %d) got (%d %v)", i, each.b, b, ok)
+			log.Printf("Failed on #%d (expected %d %v) got (%d %v)", i, each.b, each.ok, b, ok)
 			t.Fail()
 		}
 	}
@@ -162,120 +88,40 @@ func TestCountthem(t *testing.T) {
 }
 
 func TestIsADigit(t *testing.T) {
+	d0 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7)
+	d1 := makeDigit(2, 3)
+	d2 := makeDigit(0, 1, 2, 8, 9, 6, 4, 5)
+	d3 := makeDigit(0, 1, 2, 8, 9, 3, 4, 5)
+	d4 := makeDigit(7, 8, 9, 2, 3)
+	d5 := makeDigit(0, 1, 7, 8, 9, 3, 4, 5)
+	d6 := makeDigit(0, 1, 7, 6, 4, 5, 3, 8, 9)
+	d7 := makeDigit(0, 1, 2, 3)
+	d8 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+	d9 := makeDigit(0, 1, 2, 3, 4, 5, 7, 8, 9)
+	empty := makeDigit()
+	invalid := makeDigit(15)
+
 	expected := []struct {
 		b     string
 		ok    bool
 		input []bool
 	}{
-		{"", false, []bool{
-			false,
-			false, false,
-			false,
-			false, false,
-			true,
-		}},
-		{"", true, []bool{
-			false,
-			false, false,
-			false,
-			false, false,
-			false,
-		}},
-		{"1", true, []bool{
-			false,
-			true, false,
-			false,
-			true, false,
-			false,
-		}},
-		{"1", true, []bool{
-			false,
-			false, true,
-			false,
-			false, true,
-			false,
-		}},
-		{"2", true, []bool{
-			true,
-			false, true,
-			true,
-			true, false,
-			true,
-		}},
-		{"3", true, []bool{
-			true,
-			false, true,
-			true,
-			false, true,
-			true,
-		}},
-		{"4", true, []bool{
-			false,
-			true, true,
-			true,
-			false, true,
-			false,
-		}},
-		{"5", true, []bool{
-			true,
-			true, false,
-			true,
-			false, true,
-			true,
-		}},
-		{"6", true, []bool{
-			true,
-			true, false,
-			true,
-			true, true,
-			true,
-		}},
-		{"7", true, []bool{
-			true,
-			false, true,
-			false,
-			false, true,
-			false,
-		}},
-		{"8", true, []bool{
-			true,
-			true, true,
-			true,
-			true, true,
-			true,
-		}},
-		{"9", true, []bool{
-			true,
-			true, true,
-			true,
-			false, true,
-			true,
-		}},
-		{"9", true, []bool{
-			true,
-			true, true,
-			true,
-			false, true,
-			false,
-		}},
-		{"0", true, []bool{
-			true,
-			true, true,
-			false,
-			true, true,
-			true,
-		}},
-		{"11", true, []bool{
-			false,
-			true, true,
-			false,
-			true, true,
-			false,
-		}},
+		{"", false, invalid},
+		{"", true, empty},
+		{"1", true, d1},
+		{"2", true, d2},
+		{"3", true, d3},
+		{"4", true, d4},
+		{"5", true, d5},
+		{"6", true, d6},
+		{"7", true, d7},
+		{"8", true, d8},
+		{"9", true, d9},
+		{"0", true, d0},
 	}
 	for i, each := range expected {
 		if b, ok := isADigit(each.input); string(b) != each.b || ok != each.ok {
-			log.Printf("Failed on #%d (expected %s) got (%s %v)", i, each.b, b, ok)
+			log.Printf("Failed on #%d (expected %s %v) got (%s %v)", i, each.b, each.ok, b, ok)
 			t.Fail()
 		}
 	}

@@ -32,43 +32,50 @@ const (
 	matchHeadLength = 1 * multiplier
 	matchLength     = 10 * multiplier
 	digitHeight     = matchWidth*3 + matchLength*2
-	digitWidth      = matchWidth*2 + matchLength*1
+	digitWidth      = matchWidth*3 + matchLength*2
 	marginHeight    = matchWidth
 	marginWidth     = matchWidth
 	spacing         = matchWidth
 
-	segTop         = 0
-	segTopLeft     = 1
-	segTopRight    = 2
-	segMiddle      = 3
-	segBottomLeft  = 4
-	segBottomRight = 5
-	segBottom      = 6
-	segCount       = 7
+	segA1 = 0
+	segA2 = 1
+	segB  = 2
+	segC  = 3
+	segD1 = 4
+	segD2 = 5
+	segE  = 6
+	segF  = 7
+	segG1 = 8
+	segG2 = 9
+	segH  = 10
+	segI  = 11
+	segJ  = 12
+	segM  = 13
+	segL  = 14
+	segK  = 15
+
+	segCount = 16
 )
 
 var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	digitLookup      = [128]struct {
+	digitLookup      = map[int]struct {
 		val string
 		ok  bool
 	}{
-		127: {"8", true},
-		123: {"6", true},
-		119: {"0", true},
-		111: {"9", true},
-		47:  {"9", true},
-		37:  {"7", true},
-		107: {"5", true},
-		46:  {"4", true},
-		109: {"3", true},
-		93:  {"2", true},
-		18:  {"1", true},
-		36:  {"1", true},
-		54:  {"11", true},
-		0:   {"", true},
+		255:  {"0", true},
+		12:   {"1", true},
+		887:  {"2", true},
+		831:  {"3", true},
+		908:  {"4", true},
+		955:  {"5", true},
+		1019: {"6", true},
+		15:   {"7", true},
+		1023: {"8", true},
+		959:  {"9", true},
+		0:    {"", true},
 	}
 )
 
@@ -124,35 +131,71 @@ func drawPic(input []bool, img draw.Image) error {
 		pos := i % segCount
 		x := marginWidth
 		x += (i / segCount) * (digitWidth + spacing)
-		switch pos {
-		case segTopLeft, segBottomLeft:
-		case segTopRight, segBottomRight:
-			x += matchLength
-			fallthrough
-		case segTop, segMiddle, segBottom:
-			x += matchWidth
-		}
-		y := marginHeight
-		left := pos == segTop || pos == segMiddle || pos == segBottom
-		switch pos {
-		case segBottom:
-			y += matchLength
-			fallthrough
-		case segBottomLeft, segBottomRight:
-			y += matchWidth
-			fallthrough
-		case segMiddle:
-			y += matchLength
-			fallthrough
-		case segTopLeft, segTopRight:
-			y += matchWidth
-		}
 
+		y := marginHeight
 		var o Orientation
-		if left {
+
+		switch pos {
+		case segA1: // 0
+			x += matchWidth
 			o = Horizontal
-		} else {
+		case segA2: // 1
+			x += matchWidth + matchLength
+			o = Horizontal
+		case segB: // 2
+			x += matchWidth + matchLength*2
+			y += matchWidth
 			o = Vertical
+		case segC: // 3
+			x += matchWidth + matchLength*2
+			y += matchWidth*2 + matchLength
+			o = Vertical
+		case segD1: // 4
+			x += matchWidth
+			y += matchWidth*2 + matchLength*2
+			o = Horizontal
+		case segD2: // 5
+			x += matchWidth + matchLength
+			y += matchWidth*2 + matchLength*2
+			o = Horizontal
+		case segE: // 6
+			y += matchWidth*2 + matchLength
+			o = Vertical
+		case segF: // 7
+			y += matchWidth
+			o = Vertical
+		case segG1: // 8
+			x += matchWidth
+			y += matchWidth + matchLength
+			o = Horizontal
+		case segG2: // 9
+			x += matchWidth + matchLength
+			y += matchWidth + matchLength
+			o = Horizontal
+		case segH: // 10
+			x += matchWidth
+			y += matchWidth
+			o = DiagonalForward
+		case segI: // 11
+			x += matchWidth + matchLength
+			y += matchWidth
+			o = Vertical
+		case segJ: // 12
+			x += matchWidth + matchLength
+			y += matchWidth + matchLength
+			o = DiagonalBackward
+		case segM: // 13
+			x += matchWidth
+			y += matchWidth*2 + matchLength*2
+			o = DiagonalBackward
+		case segL: // 14
+			x += matchWidth + matchLength
+			y += matchWidth*2 + matchLength
+			o = Vertical
+		case segK: // 15
+			x += matchWidth + matchLength
+			y += matchWidth*2 + matchLength
+			o = DiagonalForward
 		}
 
 		err := drawMatch(img, x, y, o)
@@ -192,10 +235,8 @@ func isADigit(a []bool) ([]byte, bool) {
 			mask |= 1 << i
 		}
 	}
-	if mask < len(digitLookup) {
-		if val := digitLookup[mask]; val.ok {
-			return []byte(val.val), true
-		}
+	if val, ok := digitLookup[mask]; ok && val.ok {
+		return []byte(val.val), true
 	}
 	return []byte{}, false
 }
@@ -219,41 +260,17 @@ func isANumber(a []bool) (int, bool) {
 // Run is a subcommand `matchStickProblem run`
 //
 // Flags:
-// 	outfn: --out -out (default: "") output filename
 //
+//	outfn: --out -out (default: "") output filename
 func Run(outfn string) {
 	start := time.Now()
 
 	initial := []bool{
-		false,
-		false, false,
-		false,
-		false, false,
-		false,
-
-		true,
-		true, false,
-		true,
-		false, true,
-		true,
-
-		true,
-		true, true,
-		false,
-		true, true,
-		true,
-
-		true,
-		true, true,
-		true,
-		true, true,
-		true,
-
-		false,
-		false, false,
-		false,
-		false, false,
-		false,
+		false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+		true, true, false, true, true, true, false, true, true, true, false, false, false, false, false, false,
+		true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false,
+		true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false,
+		false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
 	}
 
 	var outf *os.File
