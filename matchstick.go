@@ -61,26 +61,24 @@ var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	digitLookup      = map[int]struct {
-		val string
-		ok  bool
-	}{
-		255:  {"0", true},
-		12:   {"1", true},
-		887:  {"2", true},
-		831:  {"3", true},
-		908:  {"4", true},
-		955:  {"5", true},
-		1019: {"6", true},
-		15:   {"7", true},
-		1023: {"8", true},
-		959:  {"9", true},
-		0:    {"", true},
+	digitLookup      = map[int]string{
+		255:  "0",
+		12:   "1",
+		887:  "2",
+		831:  "3",
+		908:  "4",
+		955:  "5",
+		1019: "6",
+		15:   "7",
+		1023: "8",
+		959:  "9",
+		0:    "",
 	}
 )
 
 func drawMatch(img draw.Image, x, y int, o Orientation) error {
-	if o == Horizontal || o == Vertical {
+	switch o {
+	case Horizontal, Vertical:
 		leftRight := o == Horizontal
 		xlim := matchWidth
 		for i := 0; i < (matchWidth * matchHeadLength); i++ {
@@ -97,30 +95,32 @@ func drawMatch(img draw.Image, x, y int, o Orientation) error {
 			img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
 		}
 		return nil
-	}
-
-	for i := 0; i < matchLength; i++ {
-		for j := 0; j < matchWidth; j++ {
-			c := matchColour
-			if i < matchHeadLength {
-				c = matchHeadColour
+	case DiagonalForward, DiagonalBackward:
+		for i := 0; i < matchLength; i++ {
+			for j := 0; j < matchWidth; j++ {
+				c := matchColour
+				if i < matchHeadLength {
+					c = matchHeadColour
+				}
+				px, py := 0, 0
+				if o == DiagonalForward {
+					// \ direction
+					px = x + i + j
+					py = y + i + (matchWidth - j)
+				} else {
+					// / direction
+					px = x + i + j
+					py = y - i + (matchWidth - j)
+				}
+				img.Set(px, py, c)
+				// fill holes
+				img.Set(px+1, py, c)
 			}
-			px, py := 0, 0
-			if o == DiagonalForward {
-				// \ direction
-				px = x + i + j
-				py = y + i + (matchWidth - j)
-			} else if o == DiagonalBackward {
-				// / direction
-				px = x + i + j
-				py = y - i + (matchWidth - j)
-			}
-			img.Set(px, py, c)
-			// fill holes
-			img.Set(px+1, py, c)
 		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported orientation: %v", o)
 	}
-	return nil
 }
 
 func drawPic(input []bool, img draw.Image) error {
@@ -235,8 +235,8 @@ func isADigit(a []bool) ([]byte, bool) {
 			mask |= 1 << i
 		}
 	}
-	if val, ok := digitLookup[mask]; ok && val.ok {
-		return []byte(val.val), true
+	if val, ok := digitLookup[mask]; ok {
+		return []byte(val), true
 	}
 	return []byte{}, false
 }
