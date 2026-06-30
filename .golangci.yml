@@ -8,3 +8,6 @@ linters:
     - errcheck
     - ineffassign
     - revive
+
+issues:
+  exclude-use-default: false
