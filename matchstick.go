@@ -62,19 +62,25 @@ var (
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
 	digitLookup      = map[int]string{
-		255:  "0",
-		12:   "1",
-		192:  "1",
-		887:  "2",
-		831:  "3",
-		908:  "4",
-		955:  "5",
-		1019: "6",
-		15:   "7",
-		1023: "8",
-		959:  "9",
-		204:  "11", // E, F, B, C (two vertical lines)
-		0:    "",
+		255:   "0",
+		12543: "0", // Slashed 0 (Outer + J, M)
+		12:    "1",
+		192:   "1",
+		18432: "1", // Center 1 (I, L)
+		19456: "1", // 1 with top flag (H, I, L)
+		887:   "2",
+		12339: "2", // Diagonal 2 (A1,A2, J, M, D1,D2)
+		831:   "3",
+		908:   "4",
+		955:   "5",
+		1019:  "6",
+		15:    "7",
+		783:   "7", // 7 with crossbar (A1,A2, B,C, G1,G2)
+		12291: "7", // Diagonal 7 (A1,A2, J, M)
+		1023:  "8",
+		959:   "9",
+		204:   "11", // E, F, B, C (two vertical lines)
+		0:     "",
 	}
 )
 

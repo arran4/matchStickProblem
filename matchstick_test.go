@@ -26,6 +26,12 @@ func TestIsANumber(t *testing.T) {
 	d0 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7)
 	d1 := makeDigit(2, 3)
 	d1Alt := makeDigit(6, 7)
+	d0Slash := makeDigit(0, 1, 2, 3, 4, 5, 6, 7, 12, 13)
+	d1Center := makeDigit(11, 14)
+	d1Flag := makeDigit(10, 11, 14)
+	d2Diag := makeDigit(0, 1, 4, 5, 12, 13)
+	d7Cross := makeDigit(0, 1, 2, 3, 8, 9)
+	d7Diag := makeDigit(0, 1, 12, 13)
 	d2 := makeDigit(0, 1, 2, 8, 9, 6, 4, 5)
 	d3 := makeDigit(0, 1, 2, 8, 9, 3, 4, 5)
 	d4 := makeDigit(7, 8, 9, 2, 3)
@@ -47,6 +53,12 @@ func TestIsANumber(t *testing.T) {
 		{0, false, empty},
 		{1, true, d1},
 		{1, true, d1Alt},
+		{0, true, d0Slash},
+		{1, true, d1Center},
+		{1, true, d1Flag},
+		{2, true, d2Diag},
+		{7, true, d7Cross},
+		{7, true, d7Diag},
 		{2, true, d2},
 		{3, true, d3},
 		{4, true, d4},
@@ -95,6 +107,12 @@ func TestIsADigit(t *testing.T) {
 	d0 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7)
 	d1 := makeDigit(2, 3)
 	d1Alt := makeDigit(6, 7)
+	d0Slash := makeDigit(0, 1, 2, 3, 4, 5, 6, 7, 12, 13)
+	d1Center := makeDigit(11, 14)
+	d1Flag := makeDigit(10, 11, 14)
+	d2Diag := makeDigit(0, 1, 4, 5, 12, 13)
+	d7Cross := makeDigit(0, 1, 2, 3, 8, 9)
+	d7Diag := makeDigit(0, 1, 12, 13)
 	d2 := makeDigit(0, 1, 2, 8, 9, 6, 4, 5)
 	d3 := makeDigit(0, 1, 2, 8, 9, 3, 4, 5)
 	d4 := makeDigit(7, 8, 9, 2, 3)
@@ -116,6 +134,12 @@ func TestIsADigit(t *testing.T) {
 		{"", true, empty},
 		{"1", true, d1},
 		{"1", true, d1Alt},
+		{"0", true, d0Slash},
+		{"1", true, d1Center},
+		{"1", true, d1Flag},
+		{"2", true, d2Diag},
+		{"7", true, d7Cross},
+		{"7", true, d7Diag},
 		{"2", true, d2},
 		{"3", true, d3},
 		{"4", true, d4},
@@ -154,7 +178,7 @@ func TestCountThem(t *testing.T) {
 			log.Printf("Failed on #%d (expected %d, %d) got (%d, %d)", i, each.t, each.f, tr, fr)
 			t.Fail()
 		}
-  }
+	}
 }
 
 func TestFindThem(t *testing.T) {
