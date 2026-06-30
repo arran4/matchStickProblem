@@ -25,6 +25,7 @@ func concat(slices ...[]bool) []bool {
 func TestIsANumber(t *testing.T) {
 	d0 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7)
 	d1 := makeDigit(2, 3)
+	d1Alt := makeDigit(6, 7)
 	d2 := makeDigit(0, 1, 2, 8, 9, 6, 4, 5)
 	d3 := makeDigit(0, 1, 2, 8, 9, 3, 4, 5)
 	d4 := makeDigit(7, 8, 9, 2, 3)
@@ -45,6 +46,7 @@ func TestIsANumber(t *testing.T) {
 		{0, false, invalid},
 		{0, false, empty},
 		{1, true, d1},
+		{1, true, d1Alt},
 		{2, true, d2},
 		{3, true, d3},
 		{4, true, d4},
@@ -92,6 +94,7 @@ func TestCountthem(t *testing.T) {
 func TestIsADigit(t *testing.T) {
 	d0 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7)
 	d1 := makeDigit(2, 3)
+	d1Alt := makeDigit(6, 7)
 	d2 := makeDigit(0, 1, 2, 8, 9, 6, 4, 5)
 	d3 := makeDigit(0, 1, 2, 8, 9, 3, 4, 5)
 	d4 := makeDigit(7, 8, 9, 2, 3)
@@ -112,6 +115,7 @@ func TestIsADigit(t *testing.T) {
 		{"", false, invalid},
 		{"", true, empty},
 		{"1", true, d1},
+		{"1", true, d1Alt},
 		{"2", true, d2},
 		{"3", true, d3},
 		{"4", true, d4},
