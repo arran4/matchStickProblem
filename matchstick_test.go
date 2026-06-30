@@ -33,6 +33,7 @@ func TestIsANumber(t *testing.T) {
 	d7 := makeDigit(0, 1, 2, 3)
 	d8 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 	d9 := makeDigit(0, 1, 2, 3, 4, 5, 7, 8, 9)
+	d11 := makeDigit(2, 3, 6, 7)
 	empty := makeDigit()
 	invalid := makeDigit(15) // K is not used alone in any standard digit here
 
@@ -53,6 +54,7 @@ func TestIsANumber(t *testing.T) {
 		{8, true, d8},
 		{9, true, d9},
 		{0, true, d0},
+		{11, true, d11},
 		{11, true, concat(d1, d1)},
 		{1111, true, concat(d1, d1, d1, d1)},
 	}
@@ -98,6 +100,7 @@ func TestIsADigit(t *testing.T) {
 	d7 := makeDigit(0, 1, 2, 3)
 	d8 := makeDigit(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 	d9 := makeDigit(0, 1, 2, 3, 4, 5, 7, 8, 9)
+	d11 := makeDigit(2, 3, 6, 7)
 	empty := makeDigit()
 	invalid := makeDigit(15)
 
@@ -118,6 +121,7 @@ func TestIsADigit(t *testing.T) {
 		{"8", true, d8},
 		{"9", true, d9},
 		{"0", true, d0},
+		{"11", true, d11},
 	}
 	for i, each := range expected {
 		if b, ok := isADigit(each.input); string(b) != each.b || ok != each.ok {
