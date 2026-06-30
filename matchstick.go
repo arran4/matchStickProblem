@@ -17,68 +17,118 @@ import (
 	"time"
 )
 
+type Orientation int
+
+const (
+	Horizontal Orientation = iota
+	Vertical
+	DiagonalForward
+	DiagonalBackward
+)
+
 const (
 	multiplier      = 10
 	matchWidth      = 1 * multiplier
 	matchHeadLength = 1 * multiplier
 	matchLength     = 10 * multiplier
 	digitHeight     = matchWidth*3 + matchLength*2
-	digitWidth      = matchWidth*2 + matchLength*1
+	digitWidth      = matchWidth*3 + matchLength*2
 	marginHeight    = matchWidth
 	marginWidth     = matchWidth
 	spacing         = matchWidth
 
-	segTop         = 0
-	segTopLeft     = 1
-	segTopRight    = 2
-	segMiddle      = 3
-	segBottomLeft  = 4
-	segBottomRight = 5
-	segBottom      = 6
-	segCount       = 7
+	segA1 = 0
+	segA2 = 1
+	segB  = 2
+	segC  = 3
+	segD1 = 4
+	segD2 = 5
+	segE  = 6
+	segF  = 7
+	segG1 = 8
+	segG2 = 9
+	segH  = 10
+	segI  = 11
+	segJ  = 12
+	segM  = 13
+	segL  = 14
+	segK  = 15
+
+	segCount = 16
 )
 
 var (
 	backgroundColour = color.Black
 	matchColour      = color.RGBA{0xA5, 0x2A, 0x2A, math.MaxUint8}
 	matchHeadColour  = color.RGBA{255, 0, 0, math.MaxUint8}
-	digitLookup      = [128]struct {
-		val string
-		ok  bool
-	}{
-		127: {"8", true},
-		123: {"6", true},
-		119: {"0", true},
-		111: {"9", true},
-		47:  {"9", true},
-		37:  {"7", true},
-		107: {"5", true},
-		46:  {"4", true},
-		109: {"3", true},
-		93:  {"2", true},
-		18:  {"1", true},
-		36:  {"1", true},
-		54:  {"11", true},
-		0:   {"", true},
+	digitLookup      = map[int]string{
+		255:   "0",
+		12543: "0", // Slashed 0 (Outer + J, M)
+		12:    "1",
+		192:   "1",
+		18432: "1", // Center 1 (I, L)
+		19456: "1", // 1 with top flag (H, I, L)
+		887:   "2",
+		12339: "2", // Diagonal 2 (A1,A2, J, M, D1,D2)
+		831:   "3",
+		908:   "4",
+		955:   "5",
+		1019:  "6",
+		15:    "7",
+		783:   "7", // 7 with crossbar (A1,A2, B,C, G1,G2)
+		12291: "7", // Diagonal 7 (A1,A2, J, M)
+		1023:  "8",
+		959:   "9",
+		204:   "11", // E, F, B, C (two vertical lines)
+		0:     "",
 	}
 )
 
-func drawMatch(img draw.Image, x, y int, leftRight bool) error {
-	xlim := matchWidth
-	for i := 0; i < (matchWidth * matchHeadLength); i++ {
-		img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
+func drawMatch(img draw.Image, x, y int, o Orientation) error {
+	switch o {
+	case Horizontal, Vertical:
+		leftRight := o == Horizontal
+		xlim := matchWidth
+		for i := 0; i < (matchWidth * matchHeadLength); i++ {
+			img.Set(x+(i%xlim), y+(i/xlim), matchHeadColour)
+		}
+		mlim := matchLength - matchHeadLength
+		xOff := matchHeadLength
+		yOff := 0
+		if !leftRight {
+			mlim = matchWidth
+			xOff, yOff = yOff, xOff
+		}
+		for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
+			img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
+		}
+		return nil
+	case DiagonalForward, DiagonalBackward:
+		for i := 0; i < matchLength; i++ {
+			for j := 0; j < matchWidth; j++ {
+				c := matchColour
+				if i < matchHeadLength {
+					c = matchHeadColour
+				}
+				px, py := 0, 0
+				if o == DiagonalForward {
+					// \ direction
+					px = x + i + j
+					py = y + i + (matchWidth - j)
+				} else {
+					// / direction
+					px = x + i + j
+					py = y - i + (matchWidth - j)
+				}
+				img.Set(px, py, c)
+				// fill holes
+				img.Set(px+1, py, c)
+			}
+		}
+		return nil
+	default:
+		return fmt.Errorf("unsupported orientation: %v", o)
 	}
-	mlim := matchLength - matchHeadLength
-	xOff := matchHeadLength
-	yOff := 0
-	if !leftRight {
-		mlim = matchWidth
-		xOff, yOff = yOff, xOff
-	}
-	for i := 0; i < (matchWidth * (matchLength - matchHeadLength)); i++ {
-		img.Set(x+(i%mlim)+xOff, y+(i/mlim)+yOff, matchColour)
-	}
-	return nil
 }
 
 func drawPic(input []bool, img draw.Image) error {
@@ -89,30 +139,74 @@ func drawPic(input []bool, img draw.Image) error {
 		pos := i % segCount
 		x := marginWidth
 		x += (i / segCount) * (digitWidth + spacing)
-		switch pos {
-		case segTopLeft, segBottomLeft:
-		case segTopRight, segBottomRight:
-			x += matchLength
-			fallthrough
-		case segTop, segMiddle, segBottom:
-			x += matchWidth
-		}
+
 		y := marginHeight
-		left := pos == segTop || pos == segMiddle || pos == segBottom
+		var o Orientation
+
 		switch pos {
-		case segBottom:
-			y += matchLength
-			fallthrough
-		case segBottomLeft, segBottomRight:
+		case segA1: // 0
+			x += matchWidth
+			o = Horizontal
+		case segA2: // 1
+			x += matchWidth + matchLength
+			o = Horizontal
+		case segB: // 2
+			x += matchWidth + matchLength*2
 			y += matchWidth
-			fallthrough
-		case segMiddle:
-			y += matchLength
-			fallthrough
-		case segTopLeft, segTopRight:
+			o = Vertical
+		case segC: // 3
+			x += matchWidth + matchLength*2
+			y += matchWidth*2 + matchLength
+			o = Vertical
+		case segD1: // 4
+			x += matchWidth
+			y += matchWidth*2 + matchLength*2
+			o = Horizontal
+		case segD2: // 5
+			x += matchWidth + matchLength
+			y += matchWidth*2 + matchLength*2
+			o = Horizontal
+		case segE: // 6
+			y += matchWidth*2 + matchLength
+			o = Vertical
+		case segF: // 7
 			y += matchWidth
+			o = Vertical
+		case segG1: // 8
+			x += matchWidth
+			y += matchWidth + matchLength
+			o = Horizontal
+		case segG2: // 9
+			x += matchWidth + matchLength
+			y += matchWidth + matchLength
+			o = Horizontal
+		case segH: // 10
+			x += matchWidth
+			y += matchWidth
+			o = DiagonalForward
+		case segI: // 11
+			x += matchWidth + matchLength
+			y += matchWidth
+			o = Vertical
+		case segJ: // 12
+			x += matchWidth + matchLength
+			y += matchWidth + matchLength
+			o = DiagonalBackward
+		case segM: // 13
+			x += matchWidth
+			y += matchWidth*2 + matchLength*2
+			o = DiagonalBackward
+		case segL: // 14
+			x += matchWidth + matchLength
+			y += matchWidth*2 + matchLength
+			o = Vertical
+		case segK: // 15
+			x += matchWidth + matchLength
+			y += matchWidth*2 + matchLength
+			o = DiagonalForward
 		}
-		err := drawMatch(img, x, y, left)
+
+		err := drawMatch(img, x, y, o)
 		if err != nil {
 			return err
 		}
@@ -149,10 +243,8 @@ func isADigit(a []bool) ([]byte, bool) {
 			mask |= 1 << i
 		}
 	}
-	if mask < len(digitLookup) {
-		if val := digitLookup[mask]; val.ok {
-			return []byte(val.val), true
-		}
+	if val, ok := digitLookup[mask]; ok {
+		return []byte(val), true
 	}
 	return []byte{}, false
 }
@@ -176,41 +268,17 @@ func isANumber(a []bool) (int, bool) {
 // Run is a subcommand `matchStickProblem run`
 //
 // Flags:
-// 	outfn: --out -out (default: "") output filename
 //
+//	outfn: --out -out (default: "") output filename
 func Run(outfn string) {
 	start := time.Now()
 
 	initial := []bool{
-		false,
-		false, false,
-		false,
-		false, false,
-		false,
-
-		true,
-		true, false,
-		true,
-		false, true,
-		true,
-
-		true,
-		true, true,
-		false,
-		true, true,
-		true,
-
-		true,
-		true, true,
-		true,
-		true, true,
-		true,
-
-		false,
-		false, false,
-		false,
-		false, false,
-		false,
+		false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+		true, true, false, true, true, true, false, true, true, true, false, false, false, false, false, false,
+		true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false,
+		true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false,
+		false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
 	}
 
 	var outf *os.File
