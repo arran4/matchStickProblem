@@ -344,6 +344,8 @@ jobs:
           cache: true
       - name: check for go vulnerabilities
         uses: golang/govulncheck-action@v1
+        with:
+          go-version-file: go.mod
 
   go-fmt-pr:
     name: go fmt -> PR (manual dispatch)

@@ -6,3 +6,7 @@ paths = [
   '''^docs/''',
   '''^testdata/'''
 ]
+
+# Include default gitleaks rules so we don't accidentally disable scanning
+[extend]
+useDefault = true
