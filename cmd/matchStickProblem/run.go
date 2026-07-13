@@ -107,7 +107,7 @@ func (c *RootCmd) NewRun() *Run {
 
 	v.CommandAction = func(c *Run) error {
 
-		matchStickProblem.Run(c.outfn)
+		matchstickproblem.Run(c.outfn)
 		return nil
 	}
 

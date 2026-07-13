@@ -1,4 +1,4 @@
-package matchStickProblem
+package matchstickproblem
 
 import (
 	"log"

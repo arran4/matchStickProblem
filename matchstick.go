@@ -1,4 +1,4 @@
-package matchStickProblem
+package matchstickproblem
 
 import (
 	"fmt"
@@ -326,15 +326,15 @@ func Run(outfn string) {
 		Image: []*image.Paletted{img},
 	}
 
-	found := []int{}
-	foundat := []int{}
+	var found []int
+	var foundat []int
 	sortedList := []int{}
 	last := 0
 	top5 := ""
 
 	if n, ok := isANumber(initial); ok {
 		log.Printf("Got number %d (initial) ", n)
-		found = append(found, n)
+		_ = append(found, n)
 		sortedList = append(sortedList, n)
 		foundat = append(foundat, -1)
 		last = n
@@ -362,10 +362,10 @@ func Run(outfn string) {
 		move2From := move2 / (free - 1)
 
 		if move2To >= move1To {
-			move2To += 1
+			move2To++
 		}
 		if move2From >= move1From {
-			move2From += 1
+			move2From++
 		}
 
 		mutate[nonfreePos[move1From]] = false
@@ -376,8 +376,8 @@ func Run(outfn string) {
 		if n, ok := isANumber(mutate); ok {
 			last = n
 			log.Printf("Got number %d at: %.0f%% %d/%d", n, float64(i)/float64(permutations)*100, i, permutations)
-			found = append(found, n)
-			foundat = append(foundat, i)
+			_ = append(found, n)
+			_ = append(foundat, i)
 
 			if a := sort.SearchInts(sortedList, n); len(sortedList) <= a || sortedList[a] != n {
 				sortedList = append(sortedList, n)
@@ -420,5 +420,5 @@ func Run(outfn string) {
 		log.Panicf("%v", err)
 	}
 
-	log.Printf("Done in %s", time.Now().Sub(start))
+	log.Printf("Done in %s", time.Since(start))
 }

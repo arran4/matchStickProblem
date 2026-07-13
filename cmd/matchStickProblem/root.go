@@ -60,7 +60,7 @@ type RootCmd struct {
 
 func (c *RootCmd) Usage() {
 	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-	c.FlagSet.PrintDefaults()
+	c.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "  Commands:")
 	for name := range c.Commands {
 		fmt.Fprintf(os.Stderr, "    %s\n", name)
@@ -69,7 +69,7 @@ func (c *RootCmd) Usage() {
 
 func (c *RootCmd) UsageRecursive() {
 	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-	c.FlagSet.PrintDefaults()
+	c.PrintDefaults()
 	fmt.Fprintln(os.Stderr, "  Commands:")
 	fmt.Fprintf(os.Stderr, "    %s\n", "run")
 }
@@ -86,8 +86,8 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 
 	c.Commands["run"] = c.NewRun()
 	c.Commands["help"] = &InternalCommand{
-		Exec: func(args []string) error {
-			for _, arg := range args {
+		Exec: func(_ []string) error {
+			for _, arg := range []string{} {
 				if arg == "-deep" {
 					c.UsageRecursive()
 					return nil
@@ -99,8 +99,8 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 		UsageFunc: c.Usage,
 	}
 	c.Commands["usage"] = &InternalCommand{
-		Exec: func(args []string) error {
-			for _, arg := range args {
+		Exec: func(_ []string) error {
+			for _, arg := range []string{} {
 				if arg == "-deep" {
 					c.UsageRecursive()
 					return nil
@@ -112,7 +112,7 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 		UsageFunc: c.Usage,
 	}
 	c.Commands["version"] = &InternalCommand{
-		Exec: func(args []string) error {
+		Exec: func(_ []string) error {
 			fmt.Printf("Version: %s\nCommit: %s\nDate: %s\n", c.Version, c.Commit, c.Date)
 			return nil
 		},
@@ -124,10 +124,10 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 }
 
 func (c *RootCmd) Execute(args []string) error {
-	if err := c.FlagSet.Parse(args); err != nil {
+	if err := c.Parse(args); err != nil {
 		return NewUserError(err, fmt.Sprintf("flag parse error %s", err.Error()))
 	}
-	remainingArgs := c.FlagSet.Args()
+	remainingArgs := c.Args()
 	if len(remainingArgs) < 1 {
 		c.Usage()
 		return nil
