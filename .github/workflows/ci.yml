@@ -218,63 +218,10 @@ jobs:
           IFS='.' read -r maj min pat <<< "$clean_tag"
           echo "next_version=${maj:-0}.${min:-0}.$(( ${pat:-0} + 1 ))-SNAPSHOT" >> "$GITHUB_OUTPUT"
 
-  discover:
-    name: Discover capabilities and cost profile
-    needs: route
-    runs-on: ubuntu-latest
-    outputs:
-      profile: ${{ steps.profile.outputs.profile }}
-      has_go: ${{ steps.detect.outputs.has_go }}
-      has_node: ${{ steps.detect.outputs.has_node }}
-      has_dart: ${{ steps.detect.outputs.has_dart }}
-      has_flutter: ${{ steps.detect.outputs.has_flutter }}
-      has_qt_cpp: ${{ steps.detect.outputs.has_qt_cpp }}
-      has_make_c: ${{ steps.detect.outputs.has_make_c }}
-      has_docker: ${{ steps.detect.outputs.has_docker }}
-      has_goreleaser: ${{ steps.detect.outputs.has_goreleaser }}
-      has_dart_or_flutter_tests: ${{ steps.detect.outputs.has_dart_or_flutter_tests }}
-      has_packaging: ${{ steps.detect.outputs.has_packaging }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - id: detect
-        shell: bash
-        run: |
-          set -euo pipefail
-          EXPECT_GO=true
-          EXPECT_NODE=false
-          EXPECT_DART=false
-          EXPECT_FLUTTER=false
-          EXPECT_QT_CPP=false
-          EXPECT_MAKE_C=false
-          EXPECT_DOCKER=false
-          EXPECT_GORELEASER=true
-
-          echo "has_go=${EXPECT_GO:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_node=${EXPECT_NODE:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_dart=${EXPECT_DART:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_flutter=${EXPECT_FLUTTER:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_qt_cpp=${EXPECT_QT_CPP:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_make_c=${EXPECT_MAKE_C:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_docker=${EXPECT_DOCKER:-false}" >> "$GITHUB_OUTPUT"
-          echo "has_goreleaser=${EXPECT_GORELEASER:-false}" >> "$GITHUB_OUTPUT"
-
-          ([[ -d test ]] || [[ -d tests ]] || [[ -f pubspec.yaml ]]) && echo "has_dart_or_flutter_tests=true" >> "$GITHUB_OUTPUT" || echo "has_dart_or_flutter_tests=false" >> "$GITHUB_OUTPUT"
-          ([[ -d packaging ]] || [[ -d pkg ]] || [[ -f debian/control ]]) && echo "has_packaging=true" >> "$GITHUB_OUTPUT" || echo "has_packaging=false" >> "$GITHUB_OUTPUT"
-
-      - id: profile
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${{ github.event.repository.private }}" == "true" ]]; then
-            echo "profile=private" >> "$GITHUB_OUTPUT"
-          else
-            echo "profile=public" >> "$GITHUB_OUTPUT"
-          fi
 
   gitleaks:
     name: Secret scan
-    needs: [route, discover]
+    needs: [route]
     if: ${{ needs.route.outputs.run_cleanup != 'true' && (needs.route.outputs.is_nightly == 'true' || needs.route.outputs.is_monthly == 'true') }}
     runs-on: ubuntu-latest
     steps:
@@ -287,14 +234,14 @@ jobs:
 
   golangci:
     name: lint
-    needs: [route, discover]
-    if: ${{ needs.discover.outputs.has_go == 'true' && needs.route.outputs.run_code_checks == 'true' }}
+    needs: [route]
+    if: ${{ needs.route.outputs.run_code_checks == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
@@ -302,8 +249,8 @@ jobs:
 
   go-test:
     name: Go lint/test (${{ matrix.os }})
-    needs: [route, discover, golangci]
-    if: ${{ needs.discover.outputs.has_go == 'true' && needs.route.outputs.run_code_checks == 'true' }}
+    needs: [route, golangci]
+    if: ${{ needs.route.outputs.run_code_checks == 'true' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -313,50 +260,52 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
           cache: true
       - name: Test
         run: go test ./... -v
 
   go-vet:
     name: Go vet
-    needs: [route, discover]
-    if: ${{ needs.discover.outputs.has_go == 'true' && needs.route.outputs.run_code_checks == 'true' && needs.discover.outputs.profile == 'public' }}
+    needs: [route]
+    if: ${{ needs.route.outputs.run_code_checks == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
           cache: true
       - run: go vet ./...
 
   go-vuln:
     name: Go vulnerability check
-    needs: [route, discover]
-    if: ${{ needs.discover.outputs.has_go == 'true' && needs.route.outputs.run_code_checks == 'true' }}
+    needs: [route]
+    if: ${{ needs.route.outputs.run_code_checks == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
           cache: true
       - name: check for go vulnerabilities
         uses: golang/govulncheck-action@v1
         with:
           go-version-file: go.mod
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   go-fmt-pr:
     name: go fmt -> PR (manual dispatch)
-    needs: [route, discover]
-    if: ${{ needs.discover.outputs.has_go == 'true' && github.event_name == 'workflow_dispatch' && inputs.mode == 'lint-fix' && inputs.allow_prs == true }}
+    needs: [route]
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'lint-fix' && inputs.allow_prs == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
       - name: Run go fmt
         run: go fmt ./...
       - name: Create PR if go fmt changed files
@@ -376,17 +325,16 @@ jobs:
 
   autofix:
     name: Auto-format and open PR
-    needs: [route, discover]
+    needs: [route]
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'lint-fix' && inputs.allow_prs == true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup Go (if needed)
-        if: ${{ needs.discover.outputs.has_go == 'true' }}
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
 
       - name: Run autofix formatters
         shell: bash
@@ -447,8 +395,8 @@ jobs:
 
   goreleaser:
     name: GoReleaser
-    needs: [route, discover, go-test, prepare-release-tag]
-    if: ${{ always() && !cancelled() && needs.route.result == 'success' && needs.discover.result == 'success' && needs.go-test.result == 'success' && needs.discover.outputs.has_go == 'true' && needs.discover.outputs.has_goreleaser == 'true' && (((github.event_name == 'push') && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && startsWith(inputs.mode, 'release-') && needs.prepare-release-tag.result == 'success')) }}
+    needs: [route, go-test, prepare-release-tag]
+    if: ${{ always() && !cancelled() && needs.route.result == 'success' && needs.go-test.result == 'success' && (((github.event_name == 'push') && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && startsWith(inputs.mode, 'release-') && needs.prepare-release-tag.result == 'success')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -456,7 +404,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version: stable
       - name: Tag commit for release (workflow_dispatch)
         if: ${{ github.event_name == 'workflow_dispatch' && startsWith(inputs.mode, 'release-') }}
         run: git tag ${{ needs.prepare-release-tag.outputs.release_tag }}

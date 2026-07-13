@@ -86,8 +86,8 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 
 	c.Commands["run"] = c.NewRun()
 	c.Commands["help"] = &InternalCommand{
-		Exec: func(args []string) error {
-			for _, arg := range args {
+		Exec: func(_ []string) error {
+			for _, arg := range []string{} {
 				if arg == "-deep" {
 					c.UsageRecursive()
 					return nil
@@ -99,8 +99,8 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 		UsageFunc: c.Usage,
 	}
 	c.Commands["usage"] = &InternalCommand{
-		Exec: func(args []string) error {
-			for _, arg := range args {
+		Exec: func(_ []string) error {
+			for _, arg := range []string{} {
 				if arg == "-deep" {
 					c.UsageRecursive()
 					return nil
@@ -112,7 +112,7 @@ func NewRoot(name, version, commit, date string) (*RootCmd, error) {
 		UsageFunc: c.Usage,
 	}
 	c.Commands["version"] = &InternalCommand{
-		Exec: func(args []string) error {
+		Exec: func(_ []string) error {
 			fmt.Printf("Version: %s\nCommit: %s\nDate: %s\n", c.Version, c.Commit, c.Date)
 			return nil
 		},
