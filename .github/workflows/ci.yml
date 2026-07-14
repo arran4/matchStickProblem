@@ -138,13 +138,15 @@ jobs:
       release_tag: ${{ steps.tag.outputs.release_tag }}
       next_version: ${{ steps.tag.outputs.next_version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup git-tag-inc
         uses: arran4/git-tag-inc-action@v1
         with:
           mode: install
+      # Do not also run `go install github.com/arran4/git-tag-inc/...` in this job.
+      # Using both is redundant and has caused avoidable CI drift.
       - id: tag
         shell: bash
         env:
@@ -156,6 +158,7 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           if [[ -n "$OVERRIDE" ]]; then
+            # Accept "1.2.3" or "v1.2.3" override input.
             OVERRIDE="${OVERRIDE#v}"
             next_tag="v$OVERRIDE"
           else
@@ -169,15 +172,19 @@ jobs:
               *) echo "Unsupported release mode: $MODE"; exit 1 ;;
             esac
             if command -v git-tag-inc >/dev/null 2>&1; then
+              # git-tag-inc uses positional commands (patch/major/minor/test/rc...)
+              # and NOT flag forms like -patch.
               level="${level#-}"
               args=(-print-version-only "$level")
               [[ -n "$suffix" ]] && args+=("$suffix")
               next_tag=$(git-tag-inc "${args[@]}")
             else
+              # Fallback implementation when git-tag-inc is not available.
               git fetch --tags --force
               latest=$(git tag -l 'v*' | sed 's/^v//' | sort -V | tail -n 1)
               [[ -z "$latest" ]] && latest='0.0.0'
 
+              # Prefer npx semver if available (same pattern used in g2 fixes).
               if command -v npx >/dev/null 2>&1; then
                 case "$level" in
                   major) bumped=$(npx --yes semver "$latest" -i major) ;;
@@ -202,6 +209,7 @@ jobs:
             fi
           fi
 
+          # Tagging safety guards to avoid duplicate/invalid release states.
           [[ "$next_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)?$ ]] || {
             echo "Invalid tag format: $next_tag" >&2
             exit 1
